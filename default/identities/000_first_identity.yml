@@ -1,0 +1,16 @@
+---
+id: first_identity  # primary key
+name: Your Name  # your actuall name which will appear in the invoice
+address:  # address which will appear in the invoice
+ - YouStreet 123/4
+ - 56789 YouCity
+ - YouCountry
+phone:
+ - +420 111 222 333
+email:
+ - your@email.com
+www:
+ - www.your-site.com
+identification:
+ tax: 1234567890  # tax id
+ registration: 987654321  # registration id

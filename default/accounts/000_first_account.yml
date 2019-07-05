@@ -1,0 +1,9 @@
+---
+id: first_account  # primary key
+name: First Account  # how should this record be displayed (doesn't go to invoice)
+bank_name: YourBank  # official bank name
+account_name: Your Name  # official bank account name
+account_number: 12-1234632/2700  # official account number
+IBAN: MY11 2222 3333 4444 5555 6666
+BIC: AABBCCDDEE
+currency: USD  # optional (doesn't go to invoice)

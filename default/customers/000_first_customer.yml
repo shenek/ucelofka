@@ -1,0 +1,8 @@
+---
+id: first_customer  # primary key
+name: First Customer  # offical customer name
+address:  # address which is supposed to appear on the invoices
+  - CoStreet 1234/5
+  - 12345 CoCity
+  - CoCountry
+identification: 123456  # Some kind of company ID

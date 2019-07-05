@@ -1,0 +1,9 @@
+---
+id: first_entry  # primary key
+name: IT system management  # name of the item
+price: 999.99  # Cost to be paid
+currency: USD  # billed currency
+details:  # optional
+  - System maintenance
+  - DB Optimizations
+  - Performing security updates
