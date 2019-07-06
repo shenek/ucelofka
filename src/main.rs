@@ -5,7 +5,7 @@ use clap::{crate_authors, crate_description, crate_name, crate_version, App, Arg
 use std::io;
 use std::path::Path;
 
-use crate::actions::invoice;
+use crate::actions::{invoice, project};
 
 pub fn check_data_dir(path_str: String) -> Result<(), String> {
     let root_dir: &Path = Path::new(&path_str[..]);
@@ -37,24 +37,24 @@ pub fn check_data_dir(path_str: String) -> Result<(), String> {
     }
 }
 
-fn main() {
-    let app = App::new(crate_name!())
+fn prepare_app() -> App<'static, 'static> {
+    App::new(crate_name!())
         .author(crate_authors!())
         .version(crate_version!())
         .about(crate_description!())
-        .arg(
-            Arg::with_name("data_dir")
-                .short("P")
-                .long("path")
-                .value_name("DATA_DIR")
-                .takes_value(true)
-                .required(false)
-                .validator(check_data_dir)
-                .help("path to data directory")
-                .default_value("."),
-        )
         .subcommand(
             SubCommand::with_name("invoice")
+                .arg(
+                    Arg::with_name("data_dir")
+                        .short("P")
+                        .long("path")
+                        .value_name("DATA_DIR")
+                        .takes_value(true)
+                        .required(false)
+                        .validator(check_data_dir)
+                        .help("path to data directory")
+                        .default_value("."),
+                )
                 .about("Invoice management")
                 .subcommand(
                     SubCommand::with_name("create")
@@ -113,38 +113,70 @@ fn main() {
                                 .required(true),
                         ),
                 ),
-        );
+        )
+        .subcommand(
+            SubCommand::with_name("project")
+                .about("Manages data project")
+                .subcommand(
+                    SubCommand::with_name("make")
+                        .about("Creates new data dir")
+                        .arg(
+                            Arg::with_name("target")
+                                .help("Where is should be placed")
+                                .short("T")
+                                .long("target")
+                                .takes_value(true)
+                                .required(true),
+                        ),
+                ),
+        )
+}
+
+fn main() {
+    let mut app = prepare_app();
 
     let matches = app.clone().get_matches();
-    let data_dir = matches.value_of("data_dir").unwrap();
-    let data_path = Path::new(data_dir).canonicalize().unwrap();
 
     let mut out = io::stdout();
 
     match matches.subcommand() {
-        ("invoice", Some(invoice_matches)) => match invoice_matches.subcommand() {
-            ("create", Some(create_matches)) => {
-                println!("xx");
-                println!("xx");
+        ("invoice", Some(invoice_matches)) => {
+            let data_dir = invoice_matches.value_of("data_dir").unwrap();
+            let data_path = Path::new(data_dir).canonicalize().unwrap();
+            match invoice_matches.subcommand() {
+                ("create", Some(_create_matches)) => {
+                    println!("xx");
+                    println!("xx");
+                }
+                ("render", Some(render_matches)) => {
+                    invoice::render(
+                        data_path.as_ref(),
+                        render_matches.value_of("invoice").unwrap(),
+                        render_matches.value_of("template").unwrap(),
+                    );
+                }
+                ("list", Some(_)) => {
+                    invoice::list(data_path.as_ref());
+                }
+                _ => {
+                    app.write_long_help(&mut out).unwrap();
+                    println!();
+                    return;
+                }
             }
-            ("render", Some(render_matches)) => {
-                invoice::render(
-                    data_path.as_ref(),
-                    render_matches.value_of("invoice").unwrap(),
-                    render_matches.value_of("template").unwrap(),
-                );
-            }
-            ("list", Some(_)) => {
-                invoice::list(data_path.as_ref());
+        }
+        ("project", Some(project_matches)) => match project_matches.subcommand() {
+            ("make", Some(new_matches)) => {
+                project::make(new_matches.value_of("target").unwrap());
             }
             _ => {
-                app.clone().write_long_help(&mut out).unwrap();
+                app.write_long_help(&mut out).unwrap();
                 println!();
                 return;
             }
         },
         _ => {
-            app.clone().write_long_help(&mut out).unwrap();
+            app.write_long_help(&mut out).unwrap();
             println!();
             return;
         }
