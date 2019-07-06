@@ -1,10 +1,12 @@
 #![allow(non_snake_case)]
 
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use std::{
     fmt,
     path::{Path, PathBuf},
 };
+use tera::Context;
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Billing {
@@ -14,6 +16,7 @@ struct Billing {
     IBAN: String,
     total: f32,
     currency: String,
+    variable_symbol: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -29,6 +32,7 @@ struct Customer {
     name: String,
     address: Vec<String>,
     identification: String,
+    email: Vec<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -50,6 +54,8 @@ struct Issuer {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Invoice {
     id: u64,
+    issue_day: String,
+    due_day: String,
     issuer: Issuer,
     customer: Customer,
     entries: Vec<Entry>,
@@ -60,6 +66,14 @@ impl fmt::Display for Invoice {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", serde_yaml::to_string(self).unwrap())?;
         Ok(())
+    }
+}
+
+impl From<&Invoice> for Context {
+    fn from(invoice: &Invoice) -> Self {
+        let mut context: Self = Self::from_serialize(invoice).unwrap();
+        context.insert("aaa", "bbb");
+        context
     }
 }
 
@@ -97,6 +111,15 @@ impl Invoices {
             invoices.push(invoice);
         }
         Self { invoices }
+    }
+
+    pub fn get<'a>(&'a self, id: u64) -> Option<&'a Invoice> {
+        for invoice in &self.invoices {
+            if invoice.id == id {
+                return Some(invoice);
+            }
+        }
+        None
     }
 }
 

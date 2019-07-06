@@ -92,7 +92,27 @@ fn main() {
                                 .required(true),
                         ),
                 )
-                .subcommand(SubCommand::with_name("list").about("Lists invoices")),
+                .subcommand(SubCommand::with_name("list").about("Lists invoices"))
+                .subcommand(
+                    SubCommand::with_name("render")
+                        .about("Renders invoice")
+                        .arg(
+                            Arg::with_name("template")
+                                .help("Template id")
+                                .short("T")
+                                .long("template")
+                                .takes_value(true)
+                                .required(true),
+                        )
+                        .arg(
+                            Arg::with_name("invoice")
+                                .help("Invoice id")
+                                .short("I")
+                                .long("invoice")
+                                .takes_value(true)
+                                .required(true),
+                        ),
+                ),
         );
 
     let matches = app.clone().get_matches();
@@ -106,6 +126,13 @@ fn main() {
             ("create", Some(create_matches)) => {
                 println!("xx");
                 println!("xx");
+            }
+            ("render", Some(render_matches)) => {
+                invoice::render(
+                    data_path.as_ref(),
+                    render_matches.value_of("invoice").unwrap(),
+                    render_matches.value_of("template").unwrap(),
+                );
             }
             ("list", Some(_)) => {
                 invoice::list(data_path.as_ref());

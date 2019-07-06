@@ -1,6 +1,9 @@
 ---
 id: 201900001
 
+issue_day: 2019-01-01
+due_day: 2019-01-15
+
 issuer:
   name: Your Name
   address:
@@ -23,6 +26,8 @@ customer:
     - CoStreet 1234/5
     - 12345 CoCity
     - CoCountry
+  email:
+    - first@customer.org
   identification: 123456
 
 entries:
@@ -41,3 +46,4 @@ billing:
   IBAN: MY11 2222 3333 4444 5555 6666
   total: 999.99
   currency: USD
+  variable_symbol: 201900001
