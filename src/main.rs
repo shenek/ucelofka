@@ -7,6 +7,36 @@ use std::path::Path;
 
 use crate::actions::invoice;
 
+pub fn check_data_dir(path_str: String) -> Result<(), String> {
+    let root_dir: &Path = Path::new(&path_str[..]);
+    if let Ok(path) = root_dir.canonicalize() {
+        if !path.is_dir() {
+            return Err(format!("{} is not directory", path_str));
+        }
+        for subdir in &[
+            "accounts",
+            "customers",
+            "entries",
+            "identities",
+            "invoices",
+            "templates",
+            "output",
+        ] {
+            let subdir_path = path.join(Path::new(subdir));
+            if !subdir_path.is_dir() {
+                return Err(format!(
+                    "data directory {} is missing {} subdir",
+                    root_dir.to_str().unwrap_or("?"),
+                    subdir
+                ));
+            }
+        }
+        Ok(())
+    } else {
+        Err(format!("{} path does not exist", path_str))
+    }
+}
+
 fn main() {
     let app = App::new(crate_name!())
         .author(crate_authors!())
@@ -19,6 +49,7 @@ fn main() {
                 .value_name("DATA_DIR")
                 .takes_value(true)
                 .required(false)
+                .validator(check_data_dir)
                 .help("path to data directory")
                 .default_value("."),
         )
@@ -66,7 +97,7 @@ fn main() {
 
     let matches = app.clone().get_matches();
     let data_dir = matches.value_of("data_dir").unwrap();
-    let data_path = Path::new(data_dir);
+    let data_path = Path::new(data_dir).canonicalize().unwrap();
 
     let mut out = io::stdout();
 
@@ -77,7 +108,7 @@ fn main() {
                 println!("xx");
             }
             ("list", Some(_)) => {
-                invoice::list(data_path);
+                invoice::list(data_path.as_ref());
             }
             _ => {
                 app.clone().write_long_help(&mut out).unwrap();
