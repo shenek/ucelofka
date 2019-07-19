@@ -1,11 +1,10 @@
 #![allow(non_snake_case)]
 
 use serde::{Deserialize, Serialize};
-use std::{
-    fmt,
-    path::{Path, PathBuf},
-};
+use std::{convert::TryFrom, fmt, path::Path};
 use tera::Context;
+
+use super::{list_directory, load_records};
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Billing {
@@ -83,33 +82,10 @@ pub struct Invoices {
 
 impl Invoices {
     pub fn load(invoice_dir: &Path) -> Self {
-        let mut paths: Vec<PathBuf> = match invoice_dir.read_dir() {
-            Ok(list) => {
-                let res: Vec<PathBuf> = list
-                    .map(|e| match e {
-                        Ok(item) => invoice_dir.join(item.path()),
-                        Err(err) => panic!(format!("{}", err)),
-                    })
-                    .collect();
-                res
-            }
-            Err(err) => panic!(format!("{}", err)),
-        };
-        // sort novices by filename
-        paths.sort();
-
-        let mut invoices: Vec<Invoice> = Vec::new();
-        for path in paths {
-            let invoice: Invoice = match std::fs::read_to_string(path) {
-                Ok(content) => match serde_yaml::from_str(&content[..]) {
-                    Ok(invoice) => invoice,
-                    Err(err) => panic!(format!("{}", err)),
-                },
-                Err(err) => panic!(format!("{}", err)),
-            };
-            invoices.push(invoice);
+        let paths = list_directory(invoice_dir);
+        Self {
+            invoices: load_records::<Invoice>(paths),
         }
-        Self { invoices }
     }
 
     pub fn get<'a>(&'a self, id: u64) -> Option<&'a Invoice> {
@@ -126,5 +102,13 @@ impl fmt::Display for Invoices {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", serde_yaml::to_string(self).unwrap())?;
         Ok(())
+    }
+}
+
+impl TryFrom<String> for Invoice {
+    type Error = serde_yaml::Error;
+
+    fn try_from(input: String) -> Result<Self, Self::Error> {
+        Ok(serde_yaml::from_str(&input)?)
     }
 }

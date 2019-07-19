@@ -5,7 +5,7 @@ use clap::{crate_authors, crate_description, crate_name, crate_version, App, Arg
 use std::io;
 use std::path::Path;
 
-use crate::actions::{invoice, project};
+use crate::actions::{account, invoice, project};
 
 pub fn check_data_dir(path_str: String) -> Result<(), String> {
     let root_dir: &Path = Path::new(&path_str[..]);
@@ -37,99 +37,113 @@ pub fn check_data_dir(path_str: String) -> Result<(), String> {
     }
 }
 
+fn prepare_data_dir() -> Arg<'static, 'static> {
+    Arg::with_name("data_dir")
+        .short("P")
+        .long("path")
+        .value_name("DATA_DIR")
+        .takes_value(true)
+        .required(false)
+        .validator(check_data_dir)
+        .help("path to data directory")
+        .default_value(".")
+}
+
+fn prepare_invoice_subcommand() -> App<'static, 'static> {
+    SubCommand::with_name("invoice")
+        .arg(prepare_data_dir())
+        .about("Invoice management")
+        .subcommand(
+            SubCommand::with_name("create")
+                .about("Creates a new invoice")
+                .arg(
+                    Arg::with_name("customer")
+                        .help("Customer id")
+                        .long("customer")
+                        .short("C")
+                        .multiple(false)
+                        .required(true),
+                )
+                .arg(
+                    Arg::with_name("identity")
+                        .help("Identity id")
+                        .short("I")
+                        .long("identity")
+                        .multiple(false)
+                        .required(true),
+                )
+                .arg(
+                    Arg::with_name("account")
+                        .help("Account id")
+                        .long("acount")
+                        .short("A")
+                        .multiple(false)
+                        .required(true),
+                )
+                .arg(
+                    Arg::with_name("entry")
+                        .help("Entry id")
+                        .short("E")
+                        .long("entry")
+                        .multiple(true)
+                        .required(true),
+                ),
+        )
+        .subcommand(SubCommand::with_name("list").about("Lists invoices"))
+        .subcommand(
+            SubCommand::with_name("render")
+                .about("Renders invoice")
+                .arg(
+                    Arg::with_name("template")
+                        .help("Template id")
+                        .short("T")
+                        .long("template")
+                        .takes_value(true)
+                        .required(true),
+                )
+                .arg(
+                    Arg::with_name("invoice")
+                        .help("Invoice id")
+                        .short("I")
+                        .long("invoice")
+                        .takes_value(true)
+                        .required(true),
+                ),
+        )
+}
+
+fn prepare_project_subcommand() -> App<'static, 'static> {
+    SubCommand::with_name("project")
+        .about("Manages data project")
+        .subcommand(
+            SubCommand::with_name("make")
+                .about("Creates new data dir")
+                .arg(
+                    Arg::with_name("target")
+                        .help("Where is should be placed")
+                        .short("T")
+                        .long("target")
+                        .takes_value(true)
+                        .required(true),
+                ),
+        )
+}
+
+fn prepare_account_subcommand() -> App<'static, 'static> {
+    SubCommand::with_name("account")
+        .arg(prepare_data_dir())
+        .about("Account management")
+        .subcommand(SubCommand::with_name("list").about("Lists account"))
+}
+
 fn prepare_app() -> App<'static, 'static> {
     App::new(crate_name!())
         .author(crate_authors!())
         .version(crate_version!())
         .about(crate_description!())
-        .subcommand(
-            SubCommand::with_name("invoice")
-                .arg(
-                    Arg::with_name("data_dir")
-                        .short("P")
-                        .long("path")
-                        .value_name("DATA_DIR")
-                        .takes_value(true)
-                        .required(false)
-                        .validator(check_data_dir)
-                        .help("path to data directory")
-                        .default_value("."),
-                )
-                .about("Invoice management")
-                .subcommand(
-                    SubCommand::with_name("create")
-                        .about("Creates a new invoice")
-                        .arg(
-                            Arg::with_name("customer")
-                                .help("Customer id")
-                                .long("customer")
-                                .short("C")
-                                .multiple(false)
-                                .required(true),
-                        )
-                        .arg(
-                            Arg::with_name("identity")
-                                .help("Identity id")
-                                .short("I")
-                                .long("identity")
-                                .multiple(false)
-                                .required(true),
-                        )
-                        .arg(
-                            Arg::with_name("account")
-                                .help("Account id")
-                                .long("acount")
-                                .short("A")
-                                .multiple(false)
-                                .required(true),
-                        )
-                        .arg(
-                            Arg::with_name("entry")
-                                .help("Entry id")
-                                .short("E")
-                                .long("entry")
-                                .multiple(true)
-                                .required(true),
-                        ),
-                )
-                .subcommand(SubCommand::with_name("list").about("Lists invoices"))
-                .subcommand(
-                    SubCommand::with_name("render")
-                        .about("Renders invoice")
-                        .arg(
-                            Arg::with_name("template")
-                                .help("Template id")
-                                .short("T")
-                                .long("template")
-                                .takes_value(true)
-                                .required(true),
-                        )
-                        .arg(
-                            Arg::with_name("invoice")
-                                .help("Invoice id")
-                                .short("I")
-                                .long("invoice")
-                                .takes_value(true)
-                                .required(true),
-                        ),
-                ),
-        )
-        .subcommand(
-            SubCommand::with_name("project")
-                .about("Manages data project")
-                .subcommand(
-                    SubCommand::with_name("make")
-                        .about("Creates new data dir")
-                        .arg(
-                            Arg::with_name("target")
-                                .help("Where is should be placed")
-                                .short("T")
-                                .long("target")
-                                .takes_value(true)
-                                .required(true),
-                        ),
-                ),
-        )
+        .subcommand(prepare_invoice_subcommand())
+        .subcommand(prepare_project_subcommand())
+        .subcommand(prepare_account_subcommand())
 }
 
 fn main() {
@@ -166,8 +180,8 @@ fn main() {
             }
         }
         ("project", Some(project_matches)) => match project_matches.subcommand() {
-            ("make", Some(new_matches)) => {
-                project::make(new_matches.value_of("target").unwrap());
+            ("make", Some(make_matches)) => {
+                project::make(make_matches.value_of("target").unwrap());
             }
             _ => {
                 app.write_long_help(&mut out).unwrap();
@@ -175,6 +189,20 @@ fn main() {
                 return;
             }
         },
+        ("account", Some(account_matches)) => {
+            let data_dir = account_matches.value_of("data_dir").unwrap();
+            let data_path = Path::new(data_dir).canonicalize().unwrap();
+            match account_matches.subcommand() {
+                ("list", Some(_)) => {
+                    account::list(data_path.as_ref());
+                }
+                _ => {
+                    app.write_long_help(&mut out).unwrap();
+                    println!();
+                    return;
+                }
+            }
+        }
         _ => {
             app.write_long_help(&mut out).unwrap();
             println!();
