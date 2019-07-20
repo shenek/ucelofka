@@ -5,7 +5,7 @@ use clap::{crate_authors, crate_description, crate_name, crate_version, App, Arg
 use std::io;
 use std::path::Path;
 
-use crate::actions::{account, invoice, project};
+use crate::actions::{account, customer, invoice, project};
 
 pub fn check_data_dir(path_str: String) -> Result<(), String> {
     let root_dir: &Path = Path::new(&path_str[..]);
@@ -136,6 +136,13 @@ fn prepare_account_subcommand() -> App<'static, 'static> {
         .subcommand(SubCommand::with_name("list").about("Lists account"))
 }
 
+fn prepare_customer_subcommand() -> App<'static, 'static> {
+    SubCommand::with_name("customer")
+        .arg(prepare_data_dir())
+        .about("Customer management")
+        .subcommand(SubCommand::with_name("list").about("Lists customers"))
+}
+
 fn prepare_app() -> App<'static, 'static> {
     App::new(crate_name!())
         .author(crate_authors!())
@@ -144,14 +151,14 @@ fn prepare_app() -> App<'static, 'static> {
         .subcommand(prepare_invoice_subcommand())
         .subcommand(prepare_project_subcommand())
         .subcommand(prepare_account_subcommand())
+        .subcommand(prepare_customer_subcommand())
 }
 
 fn main() {
     let mut app = prepare_app();
+    let mut out = io::stdout();
 
     let matches = app.clone().get_matches();
-
-    let mut out = io::stdout();
 
     match matches.subcommand() {
         ("invoice", Some(invoice_matches)) => {
@@ -195,6 +202,20 @@ fn main() {
             match account_matches.subcommand() {
                 ("list", Some(_)) => {
                     account::list(data_path.as_ref());
+                }
+                _ => {
+                    app.write_long_help(&mut out).unwrap();
+                    println!();
+                    return;
+                }
+            }
+        }
+        ("customer", Some(customer_matches)) => {
+            let data_dir = customer_matches.value_of("data_dir").unwrap();
+            let data_path = Path::new(data_dir).canonicalize().unwrap();
+            match customer_matches.subcommand() {
+                ("list", Some(_)) => {
+                    customer::list(data_path.as_ref());
                 }
                 _ => {
                     app.write_long_help(&mut out).unwrap();
