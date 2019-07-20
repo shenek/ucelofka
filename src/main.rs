@@ -5,7 +5,7 @@ use clap::{crate_authors, crate_description, crate_name, crate_version, App, Arg
 use std::io;
 use std::path::Path;
 
-use crate::actions::{account, customer, entry, invoice, project};
+use crate::actions::{account, customer, entry, identity, invoice, project};
 
 pub fn check_data_dir(path_str: String) -> Result<(), String> {
     let root_dir: &Path = Path::new(&path_str[..]);
@@ -150,6 +150,13 @@ fn prepare_entry_subcommand() -> App<'static, 'static> {
         .subcommand(SubCommand::with_name("list").about("Lists entries"))
 }
 
+fn prepare_identity_subcommand() -> App<'static, 'static> {
+    SubCommand::with_name("identity")
+        .arg(prepare_data_dir())
+        .about("Identity management")
+        .subcommand(SubCommand::with_name("list").about("Lists identities"))
+}
+
 fn prepare_app() -> App<'static, 'static> {
     App::new(crate_name!())
         .author(crate_authors!())
@@ -160,6 +167,7 @@ fn prepare_app() -> App<'static, 'static> {
         .subcommand(prepare_account_subcommand())
         .subcommand(prepare_customer_subcommand())
         .subcommand(prepare_entry_subcommand())
+        .subcommand(prepare_identity_subcommand())
 }
 
 fn main() {
@@ -238,6 +246,20 @@ fn main() {
             match entry_matches.subcommand() {
                 ("list", Some(_)) => {
                     entry::list(data_path.as_ref());
+                }
+                _ => {
+                    app.write_long_help(&mut out).unwrap();
+                    println!();
+                    return;
+                }
+            }
+        }
+        ("identity", Some(identity_matches)) => {
+            let data_dir = identity_matches.value_of("data_dir").unwrap();
+            let data_path = Path::new(data_dir).canonicalize().unwrap();
+            match identity_matches.subcommand() {
+                ("list", Some(_)) => {
+                    identity::list(data_path.as_ref());
                 }
                 _ => {
                     app.write_long_help(&mut out).unwrap();
