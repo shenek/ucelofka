@@ -5,10 +5,11 @@ use super::{list_directory, load_records};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Entry {
-    name: String,
-    price: f32,
-    currency: String,
-    details: Vec<String>,
+    pub id: String,
+    pub name: String,
+    pub price: f32,
+    pub currency: String,
+    pub details: Vec<String>,
 }
 
 impl fmt::Display for Entry {
@@ -20,7 +21,7 @@ impl fmt::Display for Entry {
 
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Entries {
-    entries: Vec<Entry>,
+    pub entries: Vec<Entry>,
 }
 
 impl Entries {

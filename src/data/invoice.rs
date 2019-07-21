@@ -7,57 +7,57 @@ use tera::Context;
 use super::{list_directory, load_records};
 
 #[derive(Debug, Deserialize, Serialize)]
-struct Billing {
-    account_name: String,
-    account_number: String,
-    BIC: String,
-    IBAN: String,
-    total: f32,
-    currency: String,
-    variable_symbol: String,
+pub struct Billing {
+    pub account_name: String,
+    pub account_number: String,
+    pub BIC: String,
+    pub IBAN: String,
+    pub total: f32,
+    pub currency: String,
+    pub variable_symbol: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct Entry {
-    name: String,
-    price: f32,
-    currency: String,
-    details: Vec<String>,
+pub struct Entry {
+    pub name: String,
+    pub price: f32,
+    pub currency: String,
+    pub details: Vec<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct Customer {
-    name: String,
-    address: Vec<String>,
-    identification: String,
-    email: Vec<String>,
+pub struct Customer {
+    pub name: String,
+    pub address: Vec<String>,
+    pub identification: String,
+    pub email: Vec<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct Identification {
-    tax: String,
-    registration: String,
+pub struct Identification {
+    pub tax: String,
+    pub registration: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct Issuer {
-    name: String,
-    address: Vec<String>,
-    phone: Vec<String>,
-    email: Vec<String>,
-    www: Vec<String>,
-    identification: Identification,
+pub struct Issuer {
+    pub name: String,
+    pub address: Vec<String>,
+    pub phone: Vec<String>,
+    pub email: Vec<String>,
+    pub www: Vec<String>,
+    pub identification: Identification,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Invoice {
-    id: u64,
-    issue_day: String,
-    due_day: String,
-    issuer: Issuer,
-    customer: Customer,
-    entries: Vec<Entry>,
-    billing: Billing,
+    pub id: u64,
+    pub issue_day: String,
+    pub due_day: String,
+    pub issuer: Issuer,
+    pub customer: Customer,
+    pub entries: Vec<Entry>,
+    pub billing: Billing,
 }
 
 impl fmt::Display for Invoice {
@@ -77,7 +77,7 @@ impl From<&Invoice> for Context {
 
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Invoices {
-    invoices: Vec<Invoice>,
+    pub invoices: Vec<Invoice>,
 }
 
 impl Invoices {

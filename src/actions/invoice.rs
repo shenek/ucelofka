@@ -1,21 +1,41 @@
 use std::{fs, path::Path};
 use tera::Tera;
 
-use crate::data::invoice::Invoices;
-use crate::data::template::Templates;
+use crate::{
+    actions,
+    data::{
+        invoice::{Invoice, Invoices},
+        template::Templates,
+    },
+};
 
 pub fn create<'a>(
     data_path: &'a Path,
     customer: &str,
     identity: &str,
     account: &str,
-    entries: &[&str],
+    entries: Vec<&str>,
 ) {
+    let account = actions::account::get(data_path, account);
+    let customer = actions::customer::get(data_path, customer);
+    let identity = actions::identity::get(data_path, identity);
+    for entry in entries {
+        let entry_rec = actions::entry::get(data_path, entry);
+    }
 }
 
-pub fn list(data_path: &Path) {
+pub fn list(data_path: &Path) -> Invoices {
     let invoice_path = data_path.join(Path::new("invoices"));
-    println!("{}", Invoices::load(invoice_path.as_path()));
+    Invoices::load(invoice_path.as_path())
+}
+
+pub fn get(data_path: &Path, id: u64) -> Option<Invoice> {
+    for invoice in list(data_path).invoices {
+        if invoice.id == id {
+            return Some(invoice);
+        }
+    }
+    None
 }
 
 pub fn render(data_path: &Path, invoice: &str, template: &str) {

@@ -5,18 +5,19 @@ use super::{list_directory, load_records};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Identification {
-    tax: String,
-    registration: String,
+    pub tax: String,
+    pub registration: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Identity {
-    name: String,
-    address: Vec<String>,
-    phone: Vec<String>,
-    email: Vec<String>,
-    www: Vec<String>,
-    identification: Identification,
+    pub id: String,
+    pub name: String,
+    pub address: Vec<String>,
+    pub phone: Vec<String>,
+    pub email: Vec<String>,
+    pub www: Vec<String>,
+    pub identification: Identification,
 }
 
 impl fmt::Display for Identity {
@@ -28,7 +29,7 @@ impl fmt::Display for Identity {
 
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Identities {
-    identities: Vec<Identity>,
+    pub identities: Vec<Identity>,
 }
 
 impl Identities {

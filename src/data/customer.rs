@@ -5,9 +5,10 @@ use super::{list_directory, load_records};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Customer {
-    name: String,
-    address: Vec<String>,
-    identification: String,
+    pub id: String,
+    pub name: String,
+    pub address: Vec<String>,
+    pub identification: String,
 }
 
 impl fmt::Display for Customer {
@@ -19,7 +20,7 @@ impl fmt::Display for Customer {
 
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Customers {
-    customers: Vec<Customer>,
+    pub customers: Vec<Customer>,
 }
 
 impl Customers {

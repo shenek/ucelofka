@@ -7,13 +7,14 @@ use super::{list_directory, load_records};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Account {
-    name: String,
-    bank_name: String,
-    account_name: String,
-    account_number: String,
-    IBAN: String,
-    BIC: String,
-    currency: String,
+    pub id: String,
+    pub name: String,
+    pub bank_name: String,
+    pub account_name: String,
+    pub account_number: String,
+    pub IBAN: String,
+    pub BIC: String,
+    pub currency: String,
 }
 
 impl fmt::Display for Account {
@@ -25,7 +26,7 @@ impl fmt::Display for Account {
 
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Accounts {
-    accounts: Vec<Account>,
+    pub accounts: Vec<Account>,
 }
 
 impl Accounts {

@@ -49,6 +49,18 @@ fn prepare_data_dir() -> Arg<'static, 'static> {
         .default_value(".")
 }
 
+fn prepare_get_subcommand(about: &'static str) -> App<'static, 'static> {
+    SubCommand::with_name("get")
+        .arg(
+            Arg::with_name("id")
+                .short("I")
+                .long("id")
+                .takes_value(true)
+                .required(true),
+        )
+        .about(about)
+}
+
 fn prepare_invoice_subcommand() -> App<'static, 'static> {
     SubCommand::with_name("invoice")
         .arg(prepare_data_dir())
@@ -110,6 +122,7 @@ fn prepare_invoice_subcommand() -> App<'static, 'static> {
                         .required(true),
                 ),
         )
+        .subcommand(prepare_get_subcommand("Get invoice"))
 }
 
 fn prepare_project_subcommand() -> App<'static, 'static> {
@@ -134,6 +147,7 @@ fn prepare_account_subcommand() -> App<'static, 'static> {
         .arg(prepare_data_dir())
         .about("Account management")
         .subcommand(SubCommand::with_name("list").about("Lists account"))
+        .subcommand(prepare_get_subcommand("Get account"))
 }
 
 fn prepare_customer_subcommand() -> App<'static, 'static> {
@@ -141,6 +155,7 @@ fn prepare_customer_subcommand() -> App<'static, 'static> {
         .arg(prepare_data_dir())
         .about("Customer management")
         .subcommand(SubCommand::with_name("list").about("Lists customers"))
+        .subcommand(prepare_get_subcommand("Get customer"))
 }
 
 fn prepare_entry_subcommand() -> App<'static, 'static> {
@@ -148,6 +163,7 @@ fn prepare_entry_subcommand() -> App<'static, 'static> {
         .arg(prepare_data_dir())
         .about("Entry management")
         .subcommand(SubCommand::with_name("list").about("Lists entries"))
+        .subcommand(prepare_get_subcommand("Get entry"))
 }
 
 fn prepare_identity_subcommand() -> App<'static, 'static> {
@@ -155,6 +171,7 @@ fn prepare_identity_subcommand() -> App<'static, 'static> {
         .arg(prepare_data_dir())
         .about("Identity management")
         .subcommand(SubCommand::with_name("list").about("Lists identities"))
+        .subcommand(prepare_get_subcommand("Get identity"))
 }
 
 fn prepare_app() -> App<'static, 'static> {
@@ -181,10 +198,13 @@ fn main() {
             let data_dir = invoice_matches.value_of("data_dir").unwrap();
             let data_path = Path::new(data_dir).canonicalize().unwrap();
             match invoice_matches.subcommand() {
-                ("create", Some(_create_matches)) => {
-                    println!("xx");
-                    println!("xx");
-                }
+                ("create", Some(create_matches)) => invoice::create(
+                    &data_path,
+                    create_matches.value_of("identity").unwrap(),
+                    create_matches.value_of("customer").unwrap(),
+                    create_matches.value_of("account").unwrap(),
+                    create_matches.values_of("entry").unwrap().collect(),
+                ),
                 ("render", Some(render_matches)) => {
                     invoice::render(
                         data_path.as_ref(),
@@ -193,7 +213,22 @@ fn main() {
                     );
                 }
                 ("list", Some(_)) => {
-                    invoice::list(data_path.as_ref());
+                    println!("{}", invoice::list(&data_path));
+                }
+                ("get", Some(get_matches)) => {
+                    if let Some(invoice) = invoice::get(
+                        &data_path,
+                        get_matches
+                            .value_of("id")
+                            .unwrap()
+                            .parse::<u64>()
+                            .unwrap_or_else(|_| std::process::exit(1)),
+                    ) {
+                        println!("{}", invoice);
+                        return;
+                    } else {
+                        std::process::exit(1);
+                    }
                 }
                 _ => {
                     app.write_long_help(&mut out).unwrap();
@@ -217,7 +252,17 @@ fn main() {
             let data_path = Path::new(data_dir).canonicalize().unwrap();
             match account_matches.subcommand() {
                 ("list", Some(_)) => {
-                    account::list(data_path.as_ref());
+                    println!("{}", account::list(&data_path));
+                }
+                ("get", Some(get_matches)) => {
+                    if let Some(account) =
+                        account::get(&data_path, get_matches.value_of("id").unwrap())
+                    {
+                        println!("{}", account);
+                        return;
+                    } else {
+                        std::process::exit(1);
+                    }
                 }
                 _ => {
                     app.write_long_help(&mut out).unwrap();
@@ -231,7 +276,17 @@ fn main() {
             let data_path = Path::new(data_dir).canonicalize().unwrap();
             match customer_matches.subcommand() {
                 ("list", Some(_)) => {
-                    customer::list(data_path.as_ref());
+                    println!("{}", customer::list(&data_path));
+                }
+                ("get", Some(get_matches)) => {
+                    if let Some(customer) =
+                        customer::get(&data_path, get_matches.value_of("id").unwrap())
+                    {
+                        println!("{}", customer);
+                        return;
+                    } else {
+                        std::process::exit(1);
+                    }
                 }
                 _ => {
                     app.write_long_help(&mut out).unwrap();
@@ -245,7 +300,16 @@ fn main() {
             let data_path = Path::new(data_dir).canonicalize().unwrap();
             match entry_matches.subcommand() {
                 ("list", Some(_)) => {
-                    entry::list(data_path.as_ref());
+                    println!("{}", entry::list(&data_path));
+                }
+                ("get", Some(get_matches)) => {
+                    if let Some(entry) = entry::get(&data_path, get_matches.value_of("id").unwrap())
+                    {
+                        println!("{}", entry);
+                        return;
+                    } else {
+                        std::process::exit(1);
+                    }
                 }
                 _ => {
                     app.write_long_help(&mut out).unwrap();
@@ -259,7 +323,17 @@ fn main() {
             let data_path = Path::new(data_dir).canonicalize().unwrap();
             match identity_matches.subcommand() {
                 ("list", Some(_)) => {
-                    identity::list(data_path.as_ref());
+                    println!("{}", identity::list(&data_path));
+                }
+                ("get", Some(get_matches)) => {
+                    if let Some(identity) =
+                        identity::get(&data_path, get_matches.value_of("id").unwrap())
+                    {
+                        println!("{}", identity);
+                        return;
+                    } else {
+                        std::process::exit(1);
+                    }
                 }
                 _ => {
                     app.write_long_help(&mut out).unwrap();
