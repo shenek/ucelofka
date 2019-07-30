@@ -76,6 +76,7 @@ fn prepare_invoice_subcommand() -> App<'static, 'static> {
                         .long("customer")
                         .short("C")
                         .multiple(false)
+                        .takes_value(true)
                         .required(true),
                 )
                 .arg(
@@ -84,14 +85,16 @@ fn prepare_invoice_subcommand() -> App<'static, 'static> {
                         .short("I")
                         .long("identity")
                         .multiple(false)
+                        .takes_value(true)
                         .required(true),
                 )
                 .arg(
                     Arg::with_name("account")
                         .help("Account id")
-                        .long("acount")
+                        .long("account")
                         .short("A")
                         .multiple(false)
+                        .takes_value(true)
                         .required(true),
                 )
                 .arg(
@@ -100,6 +103,7 @@ fn prepare_invoice_subcommand() -> App<'static, 'static> {
                         .short("E")
                         .long("entry")
                         .multiple(true)
+                        .takes_value(true)
                         .required(true),
                 ),
         )
@@ -197,13 +201,17 @@ fn get_data_dir(matches: &ArgMatches<'static>) -> PathBuf {
 fn process_invoice(matches: &ArgMatches<'static>) -> Result<(), ()> {
     let data_path = get_data_dir(matches);
     match matches.subcommand() {
-        ("create", Some(create_matches)) => invoice::create(
-            &data_path,
-            create_matches.value_of("identity").unwrap(),
-            create_matches.value_of("customer").unwrap(),
-            create_matches.value_of("account").unwrap(),
-            create_matches.values_of("entry").unwrap().collect(),
-        ),
+        ("create", Some(create_matches)) => {
+            let new_id = invoice::create(
+                &data_path,
+                create_matches.value_of("customer").unwrap(),
+                create_matches.value_of("identity").unwrap(),
+                create_matches.value_of("account").unwrap(),
+                create_matches.values_of("entry").unwrap().collect(),
+            )
+            .unwrap_or_else(|_| std::process::exit(1));
+            println!("Created invoice {}", new_id);
+        }
         ("render", Some(render_matches)) => {
             invoice::render(
                 data_path.as_ref(),
@@ -215,14 +223,7 @@ fn process_invoice(matches: &ArgMatches<'static>) -> Result<(), ()> {
             println!("{}", invoice::list(&data_path));
         }
         ("get", Some(get_matches)) => {
-            if let Some(invoice) = invoice::get(
-                &data_path,
-                get_matches
-                    .value_of("id")
-                    .unwrap()
-                    .parse::<u64>()
-                    .unwrap_or_else(|_| std::process::exit(1)),
-            ) {
+            if let Some(invoice) = invoice::get(&data_path, get_matches.value_of("id").unwrap()) {
                 println!("{}", invoice);
             } else {
                 std::process::exit(1);

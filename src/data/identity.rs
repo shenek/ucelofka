@@ -1,15 +1,15 @@
 use serde::{Deserialize, Serialize};
 use std::{convert::TryFrom, fmt, path::Path};
 
-use super::{list_directory, load_records};
+use super::{Record, Records};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Identification {
     pub tax: String,
     pub registration: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Identity {
     pub id: String,
     pub name: String,
@@ -20,6 +20,12 @@ pub struct Identity {
     pub identification: Identification,
 }
 
+impl Record for Identity {
+    fn id(&self) -> String {
+        self.id.clone()
+    }
+}
+
 impl fmt::Display for Identity {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", serde_yaml::to_string(self).unwrap())?;
@@ -27,17 +33,23 @@ impl fmt::Display for Identity {
     }
 }
 
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, Clone)]
 pub struct Identities {
     pub identities: Vec<Identity>,
 }
 
-impl Identities {
-    pub fn load(identity_dir: &Path) -> Self {
-        let paths = list_directory(identity_dir);
-        Self {
-            identities: load_records::<Identity>(paths),
-        }
+impl<'a> Records<'a, Identity> for Identities {
+    fn new(identities: Vec<Identity>) -> Self {
+        Self { identities }
+    }
+
+    fn load(dir: &Path) -> Self {
+        let paths = Self::list_directory(dir);
+        Self::new(Self::load_records(paths))
+    }
+
+    fn records(&'a self) -> &'a [Identity] {
+        &self.identities
     }
 }
 

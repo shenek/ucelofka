@@ -1,6 +1,9 @@
 use std::path::Path;
 
-use crate::data::account::{Account, Accounts};
+use crate::data::{
+    account::{Account, Accounts},
+    Records,
+};
 
 pub fn list(data_path: &Path) -> Accounts {
     let account_path = data_path.join(Path::new("accounts"));
@@ -8,10 +11,5 @@ pub fn list(data_path: &Path) -> Accounts {
 }
 
 pub fn get(data_path: &Path, id: &str) -> Option<Account> {
-    for account in list(data_path).accounts {
-        if account.id == id {
-            return Some(account);
-        }
-    }
-    None
+    list(data_path).get(id)
 }

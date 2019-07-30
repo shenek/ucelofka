@@ -1,12 +1,16 @@
 #![allow(non_snake_case)]
 
+use chrono::{Datelike, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use std::{convert::TryFrom, fmt, path::Path};
 use tera::Context;
 
-use super::{list_directory, load_records};
+use super::{Record, Records};
+use crate::data;
 
-#[derive(Debug, Deserialize, Serialize)]
+const DEFAULT_DUE: i64 = 15; // in days
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Billing {
     pub account_name: String,
     pub account_number: String,
@@ -17,7 +21,7 @@ pub struct Billing {
     pub variable_symbol: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Entry {
     pub name: String,
     pub price: f32,
@@ -25,7 +29,7 @@ pub struct Entry {
     pub details: Vec<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Customer {
     pub name: String,
     pub address: Vec<String>,
@@ -33,13 +37,13 @@ pub struct Customer {
     pub email: Vec<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Identification {
     pub tax: String,
     pub registration: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Issuer {
     pub name: String,
     pub address: Vec<String>,
@@ -49,7 +53,7 @@ pub struct Issuer {
     pub identification: Identification,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Invoice {
     pub id: u64,
     pub issue_day: String,
@@ -60,6 +64,12 @@ pub struct Invoice {
     pub billing: Billing,
 }
 
+impl Record for Invoice {
+    fn id(&self) -> String {
+        self.id.to_string()
+    }
+}
+
 impl fmt::Display for Invoice {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", serde_yaml::to_string(self).unwrap())?;
@@ -67,11 +77,72 @@ impl fmt::Display for Invoice {
     }
 }
 
-impl From<&Invoice> for Context {
-    fn from(invoice: &Invoice) -> Self {
-        let mut context: Self = Self::from_serialize(invoice).unwrap();
-        context.insert("aaa", "bbb");
-        context
+impl From<Invoice> for Context {
+    fn from(invoice: Invoice) -> Self {
+        Self::from_serialize(invoice).unwrap()
+    }
+}
+
+impl Invoice {
+    fn make_new_id(invoices: &Vec<Invoice>) -> u64 {
+        invoices
+            .iter()
+            .map(|i| i.id + 1)
+            .max()
+            .unwrap_or_else(|| Utc::today().naive_utc().year() as u64 * 100_000 + 1)
+    }
+
+    pub fn new(
+        identity: data::identity::Identity,
+        account: data::account::Account,
+        customer: data::customer::Customer,
+        entries: Vec<data::entry::Entry>,
+        invoices: Vec<Invoice>,
+    ) -> Self {
+        let total = entries.iter().map(|e| e.price).sum();
+        let new_id = Self::make_new_id(&invoices);
+        Self {
+            id: new_id,
+            issue_day: Utc::today().format("%Y-%m-%d").to_string(),
+            due_day: (Utc::now() + Duration::days(DEFAULT_DUE))
+                .format("%Y-%m-%d")
+                .to_string(),
+            issuer: Issuer {
+                name: identity.name,
+                address: identity.address,
+                email: identity.email,
+                phone: identity.phone,
+                www: identity.www,
+                identification: Identification {
+                    tax: identity.identification.tax,
+                    registration: identity.identification.registration,
+                },
+            },
+            customer: Customer {
+                name: customer.name,
+                address: customer.address,
+                identification: customer.identification,
+                email: customer.email,
+            },
+            billing: Billing {
+                account_name: account.account_name,
+                account_number: account.account_number,
+                BIC: account.BIC,
+                IBAN: account.IBAN,
+                total,
+                currency: account.currency,
+                variable_symbol: new_id.to_string(),
+            },
+            entries: entries
+                .iter()
+                .map(|e| Entry {
+                    currency: e.currency.clone(),
+                    price: e.price,
+                    name: e.name.clone(),
+                    details: e.details.clone(),
+                })
+                .collect(),
+        }
     }
 }
 
@@ -80,21 +151,18 @@ pub struct Invoices {
     pub invoices: Vec<Invoice>,
 }
 
-impl Invoices {
-    pub fn load(invoice_dir: &Path) -> Self {
-        let paths = list_directory(invoice_dir);
-        Self {
-            invoices: load_records::<Invoice>(paths),
-        }
+impl<'a> Records<'a, Invoice> for Invoices {
+    fn new(invoices: Vec<Invoice>) -> Self {
+        Self { invoices }
     }
 
-    pub fn get<'a>(&'a self, id: u64) -> Option<&'a Invoice> {
-        for invoice in &self.invoices {
-            if invoice.id == id {
-                return Some(invoice);
-            }
-        }
-        None
+    fn load(dir: &Path) -> Self {
+        let paths = Self::list_directory(dir);
+        Self::new(Self::load_records(paths))
+    }
+
+    fn records(&'a self) -> &'a [Invoice] {
+        &self.invoices
     }
 }
 

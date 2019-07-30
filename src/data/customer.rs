@@ -1,14 +1,21 @@
 use serde::{Deserialize, Serialize};
 use std::{convert::TryFrom, fmt, path::Path};
 
-use super::{list_directory, load_records};
+use super::{Record, Records};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Customer {
     pub id: String,
     pub name: String,
     pub address: Vec<String>,
     pub identification: String,
+    pub email: Vec<String>,
+}
+
+impl Record for Customer {
+    fn id(&self) -> String {
+        self.id.clone()
+    }
 }
 
 impl fmt::Display for Customer {
@@ -18,17 +25,23 @@ impl fmt::Display for Customer {
     }
 }
 
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, Clone)]
 pub struct Customers {
     pub customers: Vec<Customer>,
 }
 
-impl Customers {
-    pub fn load(customer_dir: &Path) -> Self {
-        let paths = list_directory(customer_dir);
-        Self {
-            customers: load_records::<Customer>(paths),
-        }
+impl<'a> Records<'a, Customer> for Customers {
+    fn new(customers: Vec<Customer>) -> Self {
+        Self { customers }
+    }
+
+    fn load(dir: &Path) -> Self {
+        let paths = Self::list_directory(dir);
+        Self::new(Self::load_records(paths))
+    }
+
+    fn records(&'a self) -> &'a [Customer] {
+        &self.customers
     }
 }
 

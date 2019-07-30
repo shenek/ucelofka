@@ -3,9 +3,9 @@
 use serde::{Deserialize, Serialize};
 use std::{convert::TryFrom, fmt, path::Path};
 
-use super::{list_directory, load_records};
+use super::{Record, Records};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Account {
     pub id: String,
     pub name: String,
@@ -17,6 +17,12 @@ pub struct Account {
     pub currency: String,
 }
 
+impl Record for Account {
+    fn id(&self) -> String {
+        self.id.clone()
+    }
+}
+
 impl fmt::Display for Account {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", serde_yaml::to_string(self).unwrap())?;
@@ -24,17 +30,23 @@ impl fmt::Display for Account {
     }
 }
 
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, Clone)]
 pub struct Accounts {
     pub accounts: Vec<Account>,
 }
 
-impl Accounts {
-    pub fn load(account_dir: &Path) -> Self {
-        let paths = list_directory(account_dir);
-        Self {
-            accounts: load_records::<Account>(paths),
-        }
+impl<'a> Records<'a, Account> for Accounts {
+    fn new(accounts: Vec<Account>) -> Self {
+        Self { accounts }
+    }
+
+    fn load(dir: &Path) -> Self {
+        let paths = Self::list_directory(dir);
+        Self::new(Self::load_records(paths))
+    }
+
+    fn records(&'a self) -> &'a [Account] {
+        &self.accounts
     }
 }
 

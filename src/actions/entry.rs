@@ -1,6 +1,9 @@
 use std::path::Path;
 
-use crate::data::entry::{Entries, Entry};
+use crate::data::{
+    entry::{Entries, Entry},
+    Records,
+};
 
 pub fn list(data_path: &Path) -> Entries {
     let entry_path = data_path.join(Path::new("entries"));
@@ -8,10 +11,5 @@ pub fn list(data_path: &Path) -> Entries {
 }
 
 pub fn get(data_path: &Path, id: &str) -> Option<Entry> {
-    for entry in list(data_path).entries {
-        if entry.id == id {
-            return Some(entry);
-        }
-    }
-    None
+    list(data_path).get(id)
 }

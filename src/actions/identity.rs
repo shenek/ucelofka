@@ -1,6 +1,9 @@
 use std::path::Path;
 
-use crate::data::identity::{Identities, Identity};
+use crate::data::{
+    identity::{Identities, Identity},
+    Records,
+};
 
 pub fn list(data_path: &Path) -> Identities {
     let identity_path = data_path.join(Path::new("identities"));
@@ -8,10 +11,5 @@ pub fn list(data_path: &Path) -> Identities {
 }
 
 pub fn get(data_path: &Path, id: &str) -> Option<Identity> {
-    for identity in list(data_path).identities {
-        if identity.id == id {
-            return Some(identity);
-        }
-    }
-    None
+    list(data_path).get(id)
 }
