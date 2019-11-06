@@ -1,6 +1,6 @@
 use failure::Fail;
 use std::{fs, path::Path};
-use tera::Tera;
+use tera::{Context, Tera};
 
 use crate::{
     actions,
@@ -84,7 +84,8 @@ pub fn render(data_path: &Path, invoice: &str, template: &str) {
     let renderer = Tera::new(&format!("{}/*", templates_path_str)[..])
         .expect(&format!("Failed to parse templates from {}", templates_path_str)[..]);
 
-    let output = match renderer.render(&template_instance.name[..], data.into()) {
+    let context: Context = data.into();
+    let output = match renderer.render(&template_instance.name[..], &context) {
         Ok(data) => data,
         Err(err) => panic!(format!("{}", err)),
     };
