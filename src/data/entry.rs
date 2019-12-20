@@ -12,6 +12,24 @@ pub struct Entry {
     pub details: Vec<String>,
 }
 
+impl Entry {
+    pub fn new(
+        id: String,
+        name: String,
+        price: f32,
+        currency: String,
+        details: Vec<String>,
+    ) -> Self {
+        Self {
+            id,
+            name,
+            price,
+            currency,
+            details,
+        }
+    }
+}
+
 impl Record for Entry {
     fn id(&self) -> String {
         self.id.clone()

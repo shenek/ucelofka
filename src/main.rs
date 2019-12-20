@@ -3,6 +3,7 @@ pub mod data;
 
 use clap::{
     crate_authors, crate_description, crate_name, crate_version, App, Arg, ArgMatches, SubCommand,
+    Values,
 };
 use std::io;
 use std::path::{Path, PathBuf};
@@ -170,6 +171,51 @@ fn prepare_entry_subcommand() -> App<'static, 'static> {
         .about("Entry management")
         .subcommand(SubCommand::with_name("list").about("Lists entries"))
         .subcommand(prepare_get_subcommand("Get entry"))
+        .subcommand(
+            SubCommand::with_name("create")
+                .about("Create an entry")
+                .arg(
+                    Arg::with_name("id")
+                        .help("New entry ID")
+                        .short("I")
+                        .long("id")
+                        .takes_value(true)
+                        .required(true),
+                )
+                .arg(
+                    Arg::with_name("name")
+                        .help("New entry name")
+                        .short("N")
+                        .long("name")
+                        .takes_value(true)
+                        .required(true),
+                )
+                .arg(
+                    Arg::with_name("price")
+                        .help("New entry price")
+                        .short("P")
+                        .long("price")
+                        .takes_value(true)
+                        .required(true),
+                )
+                .arg(
+                    Arg::with_name("currency")
+                        .help("New entry currency")
+                        .short("C")
+                        .long("currency")
+                        .takes_value(true)
+                        .required(true),
+                )
+                .arg(
+                    Arg::with_name("details")
+                        .help("New entry detail")
+                        .short("D")
+                        .long("detail")
+                        .takes_value(true)
+                        .multiple(true)
+                        .required(false),
+                ),
+        )
 }
 
 fn prepare_identity_subcommand() -> App<'static, 'static> {
@@ -296,6 +342,21 @@ fn process_entry(matches: &ArgMatches<'static>) -> Result<(), ()> {
             if let Some(entry) = entry::get(&data_path, get_matches.value_of("id").unwrap()) {
                 println!("{}", entry);
             } else {
+                std::process::exit(1);
+            }
+        }
+        ("create", Some(create_matches)) => {
+            let id: String = create_matches.value_of("id").unwrap().to_string();
+            let name: String = create_matches.value_of("name").unwrap().to_string();
+            let price: f32 = create_matches.value_of("price").unwrap().parse().unwrap();
+            let currency: String = create_matches.value_of("currency").unwrap().to_string();
+            let details: Vec<String> = create_matches
+                .values_of("details")
+                .or_else(|| Some(Values::default()))
+                .unwrap()
+                .map(String::from)
+                .collect();
+            if entry::create(&data_path, id, name, price, currency, details).is_err() {
                 std::process::exit(1);
             }
         }

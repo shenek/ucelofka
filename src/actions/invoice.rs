@@ -2,12 +2,6 @@ use failure::Fail;
 use std::{fs, path::Path};
 use tera::Tera;
 
-#[derive(Fail, Debug)]
-#[fail(display = "Create invoice failed {}", msg)]
-pub struct CreateError {
-    msg: String,
-}
-
 use crate::{
     actions,
     data::{
@@ -17,8 +11,14 @@ use crate::{
     },
 };
 
-pub fn create<'a>(
-    data_path: &'a Path,
+#[derive(Fail, Debug)]
+#[fail(display = "Create invoice failed {}", msg)]
+pub struct CreateError {
+    msg: String,
+}
+
+pub fn create(
+    data_path: &Path,
     customer: &str,
     identity: &str,
     account: &str,
@@ -45,7 +45,6 @@ pub fn create<'a>(
 
     let invoice_path = data_path.join(Path::new("invoices"));
 
-    // TODO store into hdd
     new_invoice
         .store(&invoice_path)
         .map_err(|err| CreateError {
