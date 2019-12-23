@@ -84,7 +84,7 @@ impl From<Invoice> for Context {
 }
 
 impl Invoice {
-    fn make_new_id(invoices: &Vec<Invoice>) -> u64 {
+    fn make_new_id(invoices: &[Self]) -> u64 {
         invoices
             .iter()
             .map(|i| i.id + 1)
@@ -96,8 +96,8 @@ impl Invoice {
         identity: data::identity::Identity,
         account: data::account::Account,
         customer: data::customer::Customer,
-        entries: Vec<data::entry::Entry>,
-        invoices: Vec<Invoice>,
+        entries: &[data::entry::Entry],
+        invoices: Vec<Self>,
     ) -> Self {
         let total = entries.iter().map(|e| e.price).sum();
         let new_id = Self::make_new_id(&invoices);

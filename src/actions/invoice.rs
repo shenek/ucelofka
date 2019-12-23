@@ -41,7 +41,7 @@ pub fn create(
         entries_vec.push(entry_item);
     }
     let invoices = list(data_path);
-    let new_invoice = Invoice::new(identity, account, customer, entries_vec, invoices.invoices);
+    let new_invoice = Invoice::new(identity, account, customer, &entries_vec, invoices.invoices);
 
     let invoice_path = data_path.join(Path::new("invoices"));
 

@@ -433,7 +433,6 @@ fn main() {
         _ => {
             app.write_long_help(&mut out).unwrap();
             println!();
-            return;
         }
     }
 }

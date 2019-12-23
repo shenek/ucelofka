@@ -3,6 +3,12 @@ name = "ucelofka"
 version = "0.1.0"
 authors = ["Stepan Henek"]
 edition = "2018"
+description = "Simple program to issue invoices"
+license = "GPLv3"
+readme = "README.md"
+keywords = ["cli", "invoice", "git"]
+repository = "https://github.com/shenek/ucelovka"
+categories = ["command-line-utilities"]
 
 build = "build.rs"
 include = ["default"]
