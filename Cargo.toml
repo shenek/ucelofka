@@ -26,3 +26,7 @@ tera = "1.0.1"
 
 [build-dependencies]
 includedir_codegen = "0.4"
+
+[[bin]]
+name = "ucelofka"
+path = "src/main.rs"
