@@ -11,7 +11,7 @@ repository = "https://github.com/shenek/ucelovka"
 categories = ["command-line-utilities"]
 
 build = "build.rs"
-include = ["default"]
+include = ["default", "build.rs", "src"]
 
 [dependencies]
 chrono = "0.4"
