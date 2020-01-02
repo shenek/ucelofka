@@ -7,7 +7,7 @@ description = "Simple program to issue invoices"
 license = "GPL-3.0"
 readme = "README.md"
 keywords = ["cli", "invoice", "git"]
-repository = "https://github.com/shenek/ucelovka"
+repository = "https://github.com/shenek/ucelofka"
 categories = ["command-line-utilities"]
 
 build = "build.rs"
