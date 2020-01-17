@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::{
     fmt,
     path::{Path, PathBuf},
@@ -31,19 +32,14 @@ pub struct Templates {
 }
 
 impl Templates {
-    pub fn load(template_dir: &Path) -> Self {
-        let mut paths: Vec<PathBuf> = match template_dir.read_dir() {
-            Ok(list) => {
-                let res: Vec<PathBuf> = list
-                    .map(|e| match e {
-                        Ok(item) => template_dir.join(item.path()),
-                        Err(err) => panic!(format!("{}", err)),
-                    })
-                    .collect();
-                res
-            }
-            Err(err) => panic!(format!("{}", err)),
-        };
+    pub fn load(template_dir: &Path) -> Result<Self> {
+        let mut paths: Vec<PathBuf> = template_dir
+            .read_dir()?
+            .collect::<Result<Vec<_>, _>>()?
+            .iter()
+            .map(|e| template_dir.join(e.path()))
+            .collect();
+
         // sort novices by filename
         paths.sort();
 
@@ -52,7 +48,7 @@ impl Templates {
             let path_buf = path.to_path_buf();
             templates.push(Template::new(path_buf));
         }
-        Self { templates }
+        Ok(Self { templates })
     }
 
     pub fn get(&self, name: &str) -> Option<Template> {

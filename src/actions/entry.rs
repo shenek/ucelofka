@@ -1,4 +1,4 @@
-use failure::Fail;
+use anyhow::{anyhow, Result};
 use std::path::Path;
 
 use crate::data::{
@@ -6,19 +6,15 @@ use crate::data::{
     Record, Records,
 };
 
-#[derive(Fail, Debug)]
-#[fail(display = "Create entry failed {}", msg)]
-pub struct CreateError {
-    msg: String,
-}
-
-pub fn list(data_path: &Path) -> Entries {
+pub fn list(data_path: &Path) -> Result<Entries> {
     let entry_path = data_path.join(Path::new("entries"));
-    Entries::load(entry_path.as_path())
+    Ok(Entries::load(entry_path.as_path())?)
 }
 
-pub fn get(data_path: &Path, id: &str) -> Option<Entry> {
-    list(data_path).get(id)
+pub fn get(data_path: &Path, id: &str) -> Result<Entry> {
+    Ok(list(data_path)?
+        .get(id)
+        .ok_or_else(|| anyhow!("Entry {} not found.", id))?)
 }
 
 pub fn create(
@@ -28,13 +24,13 @@ pub fn create(
     price: f32,
     currency: String,
     details: Vec<String>,
-) -> Result<Entry, CreateError> {
+) -> Result<Entry> {
     let entry_path = data_path.join(Path::new("entries"));
     let new_entry = Entry::new(id, name, price, currency, details);
 
-    new_entry.store(&entry_path).map_err(|err| CreateError {
-        msg: format!("{}", err),
-    })?;
+    new_entry
+        .store(&entry_path)
+        .map_err(|err| anyhow!("{}", err))?;
 
     Ok(new_entry)
 }

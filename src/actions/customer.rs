@@ -1,3 +1,4 @@
+use anyhow::{anyhow, Result};
 use std::path::Path;
 
 use crate::data::{
@@ -5,11 +6,13 @@ use crate::data::{
     Records,
 };
 
-pub fn list(data_path: &Path) -> Customers {
+pub fn list(data_path: &Path) -> Result<Customers> {
     let customer_path = data_path.join(Path::new("customers"));
-    Customers::load(customer_path.as_path())
+    Ok(Customers::load(customer_path.as_path())?)
 }
 
-pub fn get(data_path: &Path, id: &str) -> Option<Customer> {
-    list(data_path).get(id)
+pub fn get(data_path: &Path, id: &str) -> Result<Customer> {
+    Ok(list(data_path)?
+        .get(id)
+        .ok_or_else(|| anyhow!("Customer {} not found.", id))?)
 }

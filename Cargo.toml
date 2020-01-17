@@ -14,9 +14,9 @@ build = "build.rs"
 include = ["default", "build.rs", "src"]
 
 [dependencies]
+anyhow = "1.0"
 chrono = "0.4"
 clap = "2.33"
-failure = "0.1"
 includedir = { version = "0.5", features = ["flate2"] }
 phf = "0.7.21"
 serde = { version = "1.0", features = ["derive"]}

@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
 
+use anyhow::Result;
 use chrono::{Datelike, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use std::{convert::TryFrom, fmt, path::Path};
@@ -77,9 +78,10 @@ impl fmt::Display for Invoice {
     }
 }
 
-impl From<Invoice> for Context {
-    fn from(invoice: Invoice) -> Self {
-        Self::from_serialize(invoice).unwrap()
+impl TryFrom<Invoice> for Context {
+    type Error = anyhow::Error;
+    fn try_from(invoice: Invoice) -> Result<Self> {
+        Ok(Self::from_serialize(invoice).map_err(anyhow::Error::from)?)
     }
 }
 
@@ -156,9 +158,9 @@ impl<'a> Records<'a, Invoice> for Invoices {
         Self { invoices }
     }
 
-    fn load(dir: &Path) -> Self {
-        let paths = Self::list_directory(dir);
-        Self::new(Self::load_records(paths))
+    fn load(dir: &Path) -> Result<Self> {
+        let paths = Self::list_directory(dir)?;
+        Ok(Self::new(Self::load_records(paths)?))
     }
 
     fn records(&'a self) -> &'a [Invoice] {

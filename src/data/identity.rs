@@ -1,3 +1,4 @@
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::{convert::TryFrom, fmt, path::Path};
 
@@ -43,9 +44,9 @@ impl<'a> Records<'a, Identity> for Identities {
         Self { identities }
     }
 
-    fn load(dir: &Path) -> Self {
-        let paths = Self::list_directory(dir);
-        Self::new(Self::load_records(paths))
+    fn load(dir: &Path) -> Result<Self> {
+        let paths = Self::list_directory(dir)?;
+        Ok(Self::new(Self::load_records(paths)?))
     }
 
     fn records(&'a self) -> &'a [Identity] {

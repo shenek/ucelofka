@@ -1,6 +1,7 @@
 pub mod actions;
 pub mod data;
 
+use anyhow::{anyhow, Result};
 use clap::{
     crate_authors, crate_description, crate_name, crate_version, App, Arg, ArgMatches, SubCommand,
     Values,
@@ -10,11 +11,11 @@ use std::path::{Path, PathBuf};
 
 use crate::actions::{account, customer, entry, identity, invoice, project};
 
-pub fn check_data_dir(path_str: String) -> Result<(), String> {
+pub fn check_data_dir(path_str: String) -> Result<()> {
     let root_dir: &Path = Path::new(&path_str);
     if let Ok(path) = root_dir.canonicalize() {
         if !path.is_dir() {
-            return Err(format!("{} is not directory", path_str));
+            return Err(anyhow!("{} is not directory", path_str));
         }
         for subdir in &[
             "accounts",
@@ -27,7 +28,7 @@ pub fn check_data_dir(path_str: String) -> Result<(), String> {
         ] {
             let subdir_path = path.join(Path::new(subdir));
             if !subdir_path.is_dir() {
-                return Err(format!(
+                return Err(anyhow!(
                     "data directory {} is missing {} subdir",
                     root_dir.to_str().unwrap_or("?"),
                     subdir
@@ -36,7 +37,7 @@ pub fn check_data_dir(path_str: String) -> Result<(), String> {
         }
         Ok(())
     } else {
-        Err(format!("{} path does not exist", path_str))
+        Err(anyhow!("{} path does not exist", path_str))
     }
 }
 
@@ -47,7 +48,7 @@ fn prepare_data_dir() -> Arg<'static, 'static> {
         .value_name("DATA_DIR")
         .takes_value(true)
         .required(false)
-        .validator(check_data_dir)
+        .validator(|s| check_data_dir(s).map_err(|e| e.to_string()))
         .help("path to data directory")
         .default_value(".")
 }
@@ -244,7 +245,13 @@ fn get_data_dir(matches: &ArgMatches<'static>) -> PathBuf {
     Path::new(data_dir).canonicalize().unwrap()
 }
 
-fn process_invoice(matches: &ArgMatches<'static>) -> Result<(), ()> {
+fn exit_on_parse_error(mut app: App) {
+    println!();
+    app.write_long_help(&mut io::stdout()).unwrap();
+    std::process::exit(1);
+}
+
+fn process_invoice(app: App, matches: &ArgMatches<'static>) -> Result<()> {
     let data_path = get_data_dir(matches);
     match matches.subcommand() {
         ("create", Some(create_matches)) => {
@@ -254,8 +261,7 @@ fn process_invoice(matches: &ArgMatches<'static>) -> Result<(), ()> {
                 create_matches.value_of("identity").unwrap(),
                 create_matches.value_of("account").unwrap(),
                 create_matches.values_of("entry").unwrap().collect(),
-            )
-            .unwrap_or_else(|_| std::process::exit(1));
+            )?;
             println!("Created invoice {}", new_id);
         }
         ("render", Some(render_matches)) => {
@@ -263,87 +269,73 @@ fn process_invoice(matches: &ArgMatches<'static>) -> Result<(), ()> {
                 data_path.as_ref(),
                 render_matches.value_of("invoice").unwrap(),
                 render_matches.value_of("template").unwrap(),
-            );
+            )?;
         }
         ("list", Some(_)) => {
-            println!("{}", invoice::list(&data_path));
+            println!("{}", invoice::list(&data_path)?);
         }
         ("get", Some(get_matches)) => {
-            if let Some(invoice) = invoice::get(&data_path, get_matches.value_of("id").unwrap()) {
-                println!("{}", invoice);
-            } else {
-                std::process::exit(1);
-            }
+            let invoice_id = get_matches.value_of("id").unwrap();
+            let invoice = invoice::get(&data_path, invoice_id)?;
+            println!("{}", invoice);
         }
-        _ => {
-            return Err(());
-        }
+        _ => exit_on_parse_error(app),
     }
     Ok(())
 }
 
-fn process_project(matches: &ArgMatches<'static>) -> Result<(), ()> {
+fn process_project(app: App, matches: &ArgMatches<'static>) -> Result<()> {
     match matches.subcommand() {
         ("make", Some(make_matches)) => {
-            project::make(make_matches.value_of("target").unwrap());
+            project::make(make_matches.value_of("target").unwrap())?;
         }
-        _ => return Err(()),
+        _ => exit_on_parse_error(app),
     }
     Ok(())
 }
 
-fn process_accounts(matches: &ArgMatches<'static>) -> Result<(), ()> {
+fn process_accounts(app: App, matches: &ArgMatches<'static>) -> Result<()> {
     let data_path = get_data_dir(matches);
     match matches.subcommand() {
         ("list", Some(_)) => {
-            println!("{}", account::list(&data_path));
+            println!("{}", account::list(&data_path)?);
         }
         ("get", Some(get_matches)) => {
-            if let Some(account) = account::get(&data_path, get_matches.value_of("id").unwrap()) {
-                println!("{}", account);
-            } else {
-                std::process::exit(1);
-            }
+            let account_id = get_matches.value_of("id").unwrap();
+            let account = account::get(&data_path, account_id)?;
+            println!("{}", account);
         }
-        _ => {
-            return Err(());
-        }
+        _ => exit_on_parse_error(app),
     }
     Ok(())
 }
 
-fn process_customer(matches: &ArgMatches<'static>) -> Result<(), ()> {
+fn process_customer(app: App, matches: &ArgMatches<'static>) -> Result<()> {
     let data_path = get_data_dir(matches);
     match matches.subcommand() {
         ("list", Some(_)) => {
-            println!("{}", customer::list(&data_path));
+            println!("{}", customer::list(&data_path)?);
         }
         ("get", Some(get_matches)) => {
-            if let Some(customer) = customer::get(&data_path, get_matches.value_of("id").unwrap()) {
-                println!("{}", customer);
-            } else {
-                std::process::exit(1);
-            }
+            let customer_id = get_matches.value_of("id").unwrap();
+            let customer = customer::get(&data_path, customer_id)?;
+            println!("{}", customer);
         }
-        _ => {
-            return Err(());
-        }
+        _ => exit_on_parse_error(app),
     }
     Ok(())
 }
 
-fn process_entry(matches: &ArgMatches<'static>) -> Result<(), ()> {
+fn process_entry(app: App, matches: &ArgMatches<'static>) -> Result<()> {
     let data_path = get_data_dir(matches);
     match matches.subcommand() {
         ("list", Some(_)) => {
-            println!("{}", entry::list(&data_path));
+            println!("{}", entry::list(&data_path)?);
         }
         ("get", Some(get_matches)) => {
-            if let Some(entry) = entry::get(&data_path, get_matches.value_of("id").unwrap()) {
-                println!("{}", entry);
-            } else {
-                std::process::exit(1);
-            }
+            let entry_id = get_matches.value_of("id").unwrap();
+            let entry = entry::get(&data_path, entry_id)?;
+            println!("{}", entry);
         }
         ("create", Some(create_matches)) => {
             let id: String = create_matches.value_of("id").unwrap().to_string();
@@ -356,83 +348,42 @@ fn process_entry(matches: &ArgMatches<'static>) -> Result<(), ()> {
                 .unwrap()
                 .map(String::from)
                 .collect();
-            if entry::create(&data_path, id, name, price, currency, details).is_err() {
-                std::process::exit(1);
-            }
+            entry::create(&data_path, id, name, price, currency, details)?;
         }
-        _ => {
-            return Err(());
-        }
+        _ => exit_on_parse_error(app),
     }
     Ok(())
 }
 
-fn process_identity(matches: &ArgMatches<'static>) -> Result<(), ()> {
+fn process_identity(app: App, matches: &ArgMatches<'static>) -> Result<()> {
     let data_path = get_data_dir(matches);
     match matches.subcommand() {
         ("list", Some(_)) => {
-            println!("{}", identity::list(&data_path));
+            println!("{}", identity::list(&data_path)?);
         }
         ("get", Some(get_matches)) => {
-            if let Some(identity) = identity::get(&data_path, get_matches.value_of("id").unwrap()) {
-                println!("{}", identity);
-            } else {
-                std::process::exit(1);
-            }
+            let identity_id = get_matches.value_of("id").unwrap();
+            let identity = identity::get(&data_path, identity_id)?;
+            println!("{}", identity);
         }
-        _ => {
-            return Err(());
-        }
+        _ => exit_on_parse_error(app),
     }
     Ok(())
 }
 
-fn main() {
-    let mut app = prepare_app();
-    let mut out = io::stdout();
+fn main() -> Result<()> {
+    let app = prepare_app();
 
     let matches = app.clone().get_matches();
 
     match matches.subcommand() {
-        ("invoice", Some(invoice_matches)) => {
-            if process_invoice(invoice_matches).is_err() {
-                println!();
-                app.write_long_help(&mut out).unwrap();
-            }
-        }
-        ("project", Some(project_matches)) => {
-            if process_project(project_matches).is_err() {
-                println!();
-                app.write_long_help(&mut out).unwrap();
-            }
-        }
-        ("account", Some(account_matches)) => {
-            if process_accounts(account_matches).is_err() {
-                println!();
-                app.write_long_help(&mut out).unwrap();
-            }
-        }
-        ("customer", Some(customer_matches)) => {
-            if process_customer(customer_matches).is_err() {
-                println!();
-                app.write_long_help(&mut out).unwrap();
-            }
-        }
-        ("entry", Some(entry_matches)) => {
-            if process_entry(entry_matches).is_err() {
-                println!();
-                app.write_long_help(&mut out).unwrap();
-            }
-        }
-        ("identity", Some(identity_matches)) => {
-            if process_identity(identity_matches).is_err() {
-                println!();
-                app.write_long_help(&mut out).unwrap();
-            }
-        }
-        _ => {
-            app.write_long_help(&mut out).unwrap();
-            println!();
-        }
+        ("invoice", Some(invoice_matches)) => process_invoice(app.clone(), invoice_matches)?,
+        ("project", Some(project_matches)) => process_project(app.clone(), project_matches)?,
+        ("account", Some(account_matches)) => process_accounts(app.clone(), account_matches)?,
+        ("customer", Some(customer_matches)) => process_customer(app.clone(), customer_matches)?,
+        ("entry", Some(entry_matches)) => process_entry(app.clone(), entry_matches)?,
+        ("identity", Some(identity_matches)) => process_identity(app.clone(), identity_matches)?,
+        _ => exit_on_parse_error(app),
     }
+    Ok(())
 }

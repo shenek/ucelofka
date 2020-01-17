@@ -12,11 +12,12 @@ pub use identity::Identities;
 pub use invoice::Invoices;
 pub use template::Templates;
 
+use anyhow::{anyhow, Result};
 use serde::Serialize;
 use std::{
     convert::TryFrom,
     fmt::Debug,
-    fs, io,
+    fs,
     path::{Path, PathBuf},
 };
 
@@ -29,8 +30,8 @@ pub trait Record: Serialize + Debug {
         format!("{}.yml", self.id())
     }
 
-    fn store(&self, dir: &Path) -> Result<(), io::Error> {
-        let serialzed = serde_yaml::to_string(self).unwrap();
+    fn store(&self, dir: &Path) -> Result<()> {
+        let serialzed = serde_yaml::to_string(self)?;
         fs::write(dir.join(Path::new(&self.filename())), serialzed)?;
 
         Ok(())
@@ -43,7 +44,9 @@ where
     <ITEM as TryFrom<String>>::Error: std::fmt::Debug,
 {
     fn new(records: Vec<ITEM>) -> Self;
-    fn load(dir: &Path) -> Self;
+    fn load(dir: &Path) -> Result<Self>
+    where
+        Self: Sized;
     fn records(&'a self) -> &'a [ITEM];
 
     fn get(&'a self, id: &str) -> Option<ITEM> {
@@ -55,41 +58,31 @@ where
         None
     }
 
-    fn list_directory(dir: &Path) -> Vec<PathBuf> {
-        let mut res: Vec<PathBuf> = match dir.read_dir() {
-            Ok(list) => {
-                let res: Vec<PathBuf> = list
-                    .map(|e| match e {
-                        Ok(item) => dir.join(item.path()),
-                        Err(err) => panic!(format!("{}", err)),
-                    })
-                    .collect();
-                res
-            }
-            Err(err) => panic!(format!("{}", err)),
-        };
+    fn list_directory(dir: &Path) -> Result<Vec<PathBuf>> {
+        let mut res: Vec<PathBuf> = dir
+            .read_dir()?
+            .collect::<Result<Vec<_>, _>>()?
+            .iter()
+            .map(|e| dir.join(e.path()))
+            .collect();
         // sort by filename
         res.sort();
-        res
+        Ok(res)
     }
 
-    fn load_records(paths: Vec<PathBuf>) -> Vec<ITEM> {
+    fn load_records(paths: Vec<PathBuf>) -> Result<Vec<ITEM>> {
         let mut res: Vec<ITEM> = Vec::new();
 
         for path in paths {
-            let path_str = path.to_str().unwrap().to_string();
-            let parsed: ITEM = match std::fs::read_to_string(path) {
-                Ok(content) => {
-                    let item_opt: Result<ITEM, _> = ITEM::try_from(content);
-                    match item_opt {
-                        Ok(item) => item,
-                        Err(err) => panic!(format!("failed to convert {} - {:?}", path_str, err)),
-                    }
-                }
-                Err(err) => panic!(format!("{}", err)),
-            };
+            let path_str = path
+                .to_str()
+                .ok_or_else(|| anyhow!("Invalid path {}", path.to_string_lossy()))?
+                .to_string();
+            let data = std::fs::read_to_string(path)?;
+            let parsed = ITEM::try_from(data)
+                .map_err(|err| anyhow!("failed to convert {} - {:?}", path_str, err))?;
             res.push(parsed);
         }
-        res
+        Ok(res)
     }
 }
