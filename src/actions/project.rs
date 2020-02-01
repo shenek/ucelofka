@@ -1,4 +1,5 @@
 use anyhow::{anyhow, Result};
+use git2::Repository;
 use includedir::Files;
 use std::{
     env,
@@ -8,9 +9,20 @@ use std::{
 
 include!(concat!(env!("OUT_DIR"), "/default.rs"));
 
-pub fn make(data_path: &str) -> Result<()> {
+pub fn make(data_path: &str, git: bool) -> Result<()> {
     // create dirs
     create_dir_all(data_path).map_err(|err| anyhow!("failed to create project root {}", err))?;
+
+    // initialize git repository
+    let mut repo =
+        if git {
+            // initialize a repo
+            Some(Repository::init(data_path).map_err(|err| {
+                anyhow!("failed to create git repository in {} ({})", data_path, err)
+            })?)
+        } else {
+            None
+        };
 
     DEFAULTS.set_passthrough(env::var_os("PASSTHROUGH").is_some());
 
@@ -29,8 +41,21 @@ pub fn make(data_path: &str) -> Result<()> {
             create_dir_all(target).map_err(|err| anyhow!("failed to create dir {}", err))?;
         }
         let data: Vec<u8> = DEFAULTS.get(inner_path).unwrap().iter().copied().collect();
-        write(Path::new(data_path).join(inner_path_stripped), data)
-            .map_err(|err| anyhow!("failed to write file {}", err))?;
+        let target_path = Path::new(data_path).join(inner_path_stripped);
+        write(target_path.clone(), data).map_err(|err| anyhow!("failed to write file {}", err))?;
+        if let Some(repo_instance) = repo.as_mut() {
+            println!("adding {:?}", inner_path_stripped);
+            // add a file to repository
+            let mut index = repo_instance
+                .index()
+                .map_err(|err| anyhow!("Failed to get repo index ({})", err))?;
+            index
+                .add_path(inner_path_stripped)
+                .map_err(|err| anyhow!("Failed to add a file {} ({})", data_path, err))?;
+            index
+                .write()
+                .map_err(|err| anyhow!("Failed to write to index ({})", err))?;
+        }
     }
     Ok(())
 }

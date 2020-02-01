@@ -2,16 +2,17 @@ use assert_cmd::Command;
 use std::fs::remove_file;
 use tempfile::TempDir;
 
-fn prepare_project() -> TempDir {
+fn prepare_project(git: bool) -> TempDir {
     let temp_dir = TempDir::new().unwrap();
-    let assert = Command::cargo_bin("ucelofka")
-        .unwrap()
+    let mut cmd = Command::cargo_bin("ucelofka").unwrap();
+    let cmd = cmd
         .arg("project")
         .arg("make")
         .arg("--target")
-        .arg(temp_dir.path())
-        .assert();
-    assert.success();
+        .arg(temp_dir.path());
+    let cmd = if git { cmd.arg("--git") } else { cmd };
+    cmd.assert().success();
+
     remove_file(temp_dir.path().join("invoices").join(".gitkeep")).unwrap();
     temp_dir
 }
@@ -47,7 +48,8 @@ mod project {
 
     #[test]
     fn make() {
-        prepare_project();
+        prepare_project(true);
+        prepare_project(false);
     }
 }
 
@@ -56,7 +58,7 @@ mod account {
 
     #[test]
     fn list() {
-        let project_dir = prepare_project();
+        let project_dir = prepare_project(false);
 
         test_cmd(
             "account",
@@ -69,7 +71,7 @@ mod account {
 
     #[test]
     fn get() {
-        let project_dir = prepare_project();
+        let project_dir = prepare_project(false);
 
         test_cmd(
             "account",
@@ -86,7 +88,7 @@ mod customer {
 
     #[test]
     fn list() {
-        let project_dir = prepare_project();
+        let project_dir = prepare_project(false);
 
         test_cmd(
             "customer",
@@ -99,7 +101,7 @@ mod customer {
 
     #[test]
     fn get() {
-        let project_dir = prepare_project();
+        let project_dir = prepare_project(false);
 
         test_cmd(
             "customer",
@@ -116,7 +118,7 @@ mod entry {
 
     #[test]
     fn list() {
-        let project_dir = prepare_project();
+        let project_dir = prepare_project(false);
 
         test_cmd(
             "entry",
@@ -129,7 +131,7 @@ mod entry {
 
     #[test]
     fn get() {
-        let project_dir = prepare_project();
+        let project_dir = prepare_project(false);
 
         test_cmd(
             "entry",
@@ -142,7 +144,7 @@ mod entry {
 
     #[test]
     fn create() {
-        let project_dir = prepare_project();
+        let project_dir = prepare_project(false);
 
         test_cmd(
             "entry",
@@ -176,7 +178,7 @@ mod identity {
 
     #[test]
     fn get() {
-        let project_dir = prepare_project();
+        let project_dir = prepare_project(false);
 
         test_cmd(
             "identity",
@@ -189,7 +191,7 @@ mod identity {
 
     #[test]
     fn list() {
-        let project_dir = prepare_project();
+        let project_dir = prepare_project(false);
 
         test_cmd(
             "identity",
@@ -233,7 +235,7 @@ mod invoice {
 
     #[test]
     fn create() {
-        let project_dir = prepare_project();
+        let project_dir = prepare_project(false);
         let invoice_id = invoice(project_dir.path().to_str().unwrap());
 
         test_cmd(
@@ -247,7 +249,7 @@ mod invoice {
 
     #[test]
     fn list() {
-        let project_dir = prepare_project();
+        let project_dir = prepare_project(false);
 
         test_cmd(
             "invoice",
@@ -260,7 +262,7 @@ mod invoice {
 
     #[test]
     fn get() {
-        let project_dir = prepare_project();
+        let project_dir = prepare_project(false);
         let invoice_id = invoice(project_dir.path().to_str().unwrap());
 
         test_cmd(
@@ -274,7 +276,7 @@ mod invoice {
 
     #[test]
     fn render() {
-        let project_dir = prepare_project();
+        let project_dir = prepare_project(false);
         let invoice_id = invoice(project_dir.path().to_str().unwrap());
 
         test_cmd(

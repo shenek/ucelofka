@@ -146,6 +146,15 @@ fn prepare_project_subcommand() -> App<'static, 'static> {
                         .long("target")
                         .takes_value(true)
                         .required(true),
+                )
+                .arg(
+                    Arg::with_name("git")
+                        .env("UCELOFKA_GIT")
+                        .help("Initialize with a git repository")
+                        .short("G")
+                        .long("git")
+                        .takes_value(false)
+                        .required(false),
                 ),
         )
 }
@@ -287,7 +296,10 @@ fn process_invoice(app: App, matches: &ArgMatches<'static>) -> Result<()> {
 fn process_project(app: App, matches: &ArgMatches<'static>) -> Result<()> {
     match matches.subcommand() {
         ("make", Some(make_matches)) => {
-            project::make(make_matches.value_of("target").unwrap())?;
+            project::make(
+                make_matches.value_of("target").unwrap(),
+                make_matches.is_present("git"),
+            )?;
         }
         _ => exit_on_parse_error(app),
     }
