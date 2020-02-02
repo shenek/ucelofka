@@ -224,6 +224,15 @@ fn prepare_entry_subcommand() -> App<'static, 'static> {
                         .takes_value(true)
                         .multiple(true)
                         .required(false),
+                )
+                .arg(
+                    Arg::with_name("git")
+                        .env("UCELOFKA_GIT")
+                        .help("Initialize with a git repository")
+                        .short("G")
+                        .long("git")
+                        .takes_value(false)
+                        .required(false),
                 ),
         )
 }
@@ -354,13 +363,14 @@ fn process_entry(app: App, matches: &ArgMatches<'static>) -> Result<()> {
             let name: String = create_matches.value_of("name").unwrap().to_string();
             let price: f32 = create_matches.value_of("price").unwrap().parse().unwrap();
             let currency: String = create_matches.value_of("currency").unwrap().to_string();
+            let git = create_matches.is_present("git");
             let details: Vec<String> = create_matches
                 .values_of("details")
                 .or_else(|| Some(Values::default()))
                 .unwrap()
                 .map(String::from)
                 .collect();
-            entry::create(&data_path, id, name, price, currency, details)?;
+            entry::create(&data_path, id, name, price, currency, details, git)?;
         }
         _ => exit_on_parse_error(app),
     }

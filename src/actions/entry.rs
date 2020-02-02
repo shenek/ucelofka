@@ -1,4 +1,5 @@
 use anyhow::{anyhow, Result};
+use git2::Repository;
 use std::path::Path;
 
 use crate::data::{
@@ -24,13 +25,43 @@ pub fn create(
     price: f32,
     currency: String,
     details: Vec<String>,
+    git: bool,
 ) -> Result<Entry> {
     let entry_path = data_path.join(Path::new("entries"));
     let new_entry = Entry::new(id, name, price, currency, details);
 
+    let mut repository = if git {
+        Some(
+            Repository::open(data_path)
+                .map_err(|err| anyhow!("Faield to open git repository {}", err))?,
+        )
+    } else {
+        None
+    };
+
     new_entry
         .store(&entry_path)
         .map_err(|err| anyhow!("{}", err))?;
+
+    if let Some(repo) = repository.as_mut() {
+        let new_path = Path::new("entries").join(new_entry.filename());
+
+        let mut index = repo
+            .index()
+            .map_err(|err| anyhow!("Failed to get repo index ({})", err))?;
+        println!("{}", new_path.to_string_lossy());
+        index.add_path(&new_path).map_err(|err| {
+            anyhow!(
+                "Failed to add a file {} ({})",
+                new_path.to_string_lossy(),
+                err
+            )
+        })?;
+
+        index
+            .write()
+            .map_err(|err| anyhow!("Failed to write to index ({})", err))?;
+    }
 
     Ok(new_entry)
 }

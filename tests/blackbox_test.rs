@@ -170,6 +170,34 @@ mod entry {
             &[],
             &["entries:", "id: 002_second_entry"],
         );
+
+        let project_dir = prepare_project(true);
+
+        test_cmd(
+            "entry",
+            "create",
+            project_dir.path().to_str().unwrap(),
+            &[
+                "--id",
+                "002_second_entry",
+                "--currency",
+                "CZK",
+                "--name",
+                "hard work 1",
+                "--price",
+                "99.9",
+                "--git",
+            ],
+            &[],
+        );
+
+        test_cmd(
+            "entry",
+            "list",
+            project_dir.path().to_str().unwrap(),
+            &[],
+            &["entries:", "id: 002_second_entry"],
+        );
     }
 }
 
