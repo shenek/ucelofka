@@ -234,12 +234,9 @@ mod identity {
 mod invoice {
     use super::{prepare_project, test_cmd};
 
-    fn invoice(path: &str) -> String {
-        let (output, _) = test_cmd(
-            "invoice",
-            "create",
-            path,
-            &[
+    fn invoice(path: &str, git: bool) -> String {
+        let args = if git {
+            vec![
                 "--account",
                 "first_account",
                 "--customer",
@@ -248,9 +245,21 @@ mod invoice {
                 "first_identity",
                 "--entry",
                 "001_first_entry",
-            ],
-            &[],
-        );
+                "--git",
+            ]
+        } else {
+            vec![
+                "--account",
+                "first_account",
+                "--customer",
+                "first_customer",
+                "--identity",
+                "first_identity",
+                "--entry",
+                "001_first_entry",
+            ]
+        };
+        let (output, _) = test_cmd("invoice", "create", path, &args, &[]);
 
         output
             .split_whitespace()
@@ -264,7 +273,18 @@ mod invoice {
     #[test]
     fn create() {
         let project_dir = prepare_project(false);
-        let invoice_id = invoice(project_dir.path().to_str().unwrap());
+        let invoice_id = invoice(project_dir.path().to_str().unwrap(), false);
+
+        test_cmd(
+            "invoice",
+            "list",
+            project_dir.path().to_str().unwrap(),
+            &[],
+            &["invoices:", &format!("id: {}", invoice_id)],
+        );
+
+        let project_dir = prepare_project(true);
+        let invoice_id = invoice(project_dir.path().to_str().unwrap(), true);
 
         test_cmd(
             "invoice",
@@ -291,7 +311,18 @@ mod invoice {
     #[test]
     fn get() {
         let project_dir = prepare_project(false);
-        let invoice_id = invoice(project_dir.path().to_str().unwrap());
+        let invoice_id = invoice(project_dir.path().to_str().unwrap(), false);
+
+        test_cmd(
+            "invoice",
+            "get",
+            project_dir.path().to_str().unwrap(),
+            &["--id", &invoice_id],
+            &[&format!("id: {}", invoice_id)],
+        );
+
+        let project_dir = prepare_project(true);
+        let invoice_id = invoice(project_dir.path().to_str().unwrap(), true);
 
         test_cmd(
             "invoice",
@@ -305,13 +336,30 @@ mod invoice {
     #[test]
     fn render() {
         let project_dir = prepare_project(false);
-        let invoice_id = invoice(project_dir.path().to_str().unwrap());
+        let invoice_id = invoice(project_dir.path().to_str().unwrap(), false);
 
         test_cmd(
             "invoice",
             "render",
             project_dir.path().to_str().unwrap(),
             &["--invoice", &invoice_id, "--template", "default.html"],
+            &[],
+        );
+
+        let project_dir = prepare_project(true);
+        let invoice_id = invoice(project_dir.path().to_str().unwrap(), true);
+
+        test_cmd(
+            "invoice",
+            "render",
+            project_dir.path().to_str().unwrap(),
+            &[
+                "--invoice",
+                &invoice_id,
+                "--template",
+                "default.html",
+                "--git",
+            ],
             &[],
         );
     }

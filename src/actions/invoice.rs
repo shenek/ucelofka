@@ -1,4 +1,5 @@
 use anyhow::{anyhow, Result};
+use git2::Repository;
 use std::{convert::TryInto, fs, path::Path};
 use tera::{Context, Tera};
 
@@ -17,6 +18,7 @@ pub fn create(
     identity: &str,
     account: &str,
     entries: Vec<&str>,
+    git: bool,
 ) -> Result<String> {
     let account = actions::account::get(data_path, account)?;
     let customer = actions::customer::get(data_path, customer)?;
@@ -41,6 +43,25 @@ pub fn create(
         .store(&invoice_path)
         .map_err(|err| anyhow!("{}", err))?;
 
+    if git {
+        let git_path =
+            Path::new("invoices").join(Path::new(&format!("{}.yml", new_invoice.id.to_string())));
+        let repo = Repository::open(data_path)
+            .map_err(|err| anyhow!("Faield to open git repository {}", err))?;
+
+        let mut index = repo
+            .index()
+            .map_err(|err| anyhow!("Failed to get repo index ({})", err))?;
+
+        index.add_path(&git_path).map_err(|err| {
+            anyhow!(
+                "Failed to add a file {} ({})",
+                git_path.to_string_lossy(),
+                err
+            )
+        })?;
+    }
+
     Ok(new_invoice.id.to_string())
 }
 
@@ -55,7 +76,7 @@ pub fn get(data_path: &Path, id: &str) -> Result<Invoice> {
         .ok_or_else(|| anyhow!("Invoice {} not found.", id))?)
 }
 
-pub fn render(data_path: &Path, invoice: &str, template: &str) -> Result<()> {
+pub fn render(data_path: &Path, invoice: &str, template: &str, git: bool) -> Result<()> {
     // get the invoice data
     let invoice_path = data_path.join(Path::new("invoices"));
     let invoices = Invoices::load(invoice_path.as_path())?;
@@ -102,7 +123,26 @@ pub fn render(data_path: &Path, invoice: &str, template: &str) -> Result<()> {
         .join(Path::new("output"))
         .join(Path::new(&output_name[..]));
 
-    fs::write(output_path, output)
+    fs::write(output_path.clone(), output)
         .map_err(|err| anyhow!("failed to write to output file: {}", err))?;
+
+    if git {
+        let git_path = Path::new("output").join(Path::new(&output_name));
+        let repo = Repository::open(data_path)
+            .map_err(|err| anyhow!("Faield to open git repository {}", err))?;
+
+        let mut index = repo
+            .index()
+            .map_err(|err| anyhow!("Failed to get repo index ({})", err))?;
+
+        index.add_path(&git_path).map_err(|err| {
+            anyhow!(
+                "Failed to add a file {} ({})",
+                output_path.to_string_lossy(),
+                err
+            )
+        })?;
+    }
+
     Ok(())
 }

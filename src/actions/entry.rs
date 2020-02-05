@@ -49,7 +49,6 @@ pub fn create(
         let mut index = repo
             .index()
             .map_err(|err| anyhow!("Failed to get repo index ({})", err))?;
-        println!("{}", new_path.to_string_lossy());
         index.add_path(&new_path).map_err(|err| {
             anyhow!(
                 "Failed to add a file {} ({})",

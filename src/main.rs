@@ -107,6 +107,15 @@ fn prepare_invoice_subcommand() -> App<'static, 'static> {
                         .multiple(true)
                         .takes_value(true)
                         .required(true),
+                )
+                .arg(
+                    Arg::with_name("git")
+                        .env("UCELOFKA_GIT")
+                        .help("Add newly created invoice to git")
+                        .short("G")
+                        .long("git")
+                        .takes_value(false)
+                        .required(false),
                 ),
         )
         .subcommand(SubCommand::with_name("list").about("Lists invoices"))
@@ -128,6 +137,15 @@ fn prepare_invoice_subcommand() -> App<'static, 'static> {
                         .long("invoice")
                         .takes_value(true)
                         .required(true),
+                )
+                .arg(
+                    Arg::with_name("git")
+                        .env("UCELOFKA_GIT")
+                        .help("Add newly created file to git")
+                        .short("G")
+                        .long("git")
+                        .takes_value(false)
+                        .required(false),
                 ),
         )
         .subcommand(prepare_get_subcommand("Get invoice"))
@@ -228,7 +246,7 @@ fn prepare_entry_subcommand() -> App<'static, 'static> {
                 .arg(
                     Arg::with_name("git")
                         .env("UCELOFKA_GIT")
-                        .help("Initialize with a git repository")
+                        .help("Add newly created entry to git")
                         .short("G")
                         .long("git")
                         .takes_value(false)
@@ -279,6 +297,7 @@ fn process_invoice(app: App, matches: &ArgMatches<'static>) -> Result<()> {
                 create_matches.value_of("identity").unwrap(),
                 create_matches.value_of("account").unwrap(),
                 create_matches.values_of("entry").unwrap().collect(),
+                create_matches.is_present("git"),
             )?;
             println!("Created invoice {}", new_id);
         }
@@ -287,6 +306,7 @@ fn process_invoice(app: App, matches: &ArgMatches<'static>) -> Result<()> {
                 data_path.as_ref(),
                 render_matches.value_of("invoice").unwrap(),
                 render_matches.value_of("template").unwrap(),
+                render_matches.is_present("git"),
             )?;
         }
         ("list", Some(_)) => {
