@@ -32,7 +32,7 @@ pub trait Record: Serialize + Debug {
 
     fn store(&self, dir: &Path) -> Result<()> {
         let serialzed = serde_yaml::to_string(self)?;
-        fs::write(dir.join(Path::new(&self.filename())), serialzed)?;
+        fs::write(dir.join(Path::new(&self.filename())), serialzed + "\n")?;
 
         Ok(())
     }
