@@ -1,13 +1,12 @@
 use anyhow::{anyhow, Result};
 use git2::Repository;
-use includedir::Files;
+use include_dir::{include_dir, Dir, DirEntry};
 use std::{
-    env,
     fs::{create_dir_all, write},
     path::Path,
 };
 
-include!(concat!(env!("OUT_DIR"), "/default.rs"));
+static DEFAULTS: Dir = include_dir!("default/");
 
 pub fn make(data_path: &str, git: bool) -> Result<()> {
     // create dirs
@@ -24,38 +23,39 @@ pub fn make(data_path: &str, git: bool) -> Result<()> {
             None
         };
 
-    DEFAULTS.set_passthrough(env::var_os("PASSTHROUGH").is_some());
-
-    // write all files
-    let inner_paths: Vec<&'static str> = DEFAULTS.file_names().collect();
+    let inner_paths = DEFAULTS.find("**").map_err(|err| anyhow!("{}", err))?;
 
     for inner_path in inner_paths {
-        // remove 'default' from the inner path
-        let inner_path_stripped = Path::new(inner_path)
-            .strip_prefix("default")
-            .map_err(|err| anyhow!("{}", err))?;
+        if inner_path.path() == Path::new("") {
+            continue; // skip root
+        }
 
-        // first create directory
-        if let Some(parent) = inner_path_stripped.parent() {
-            let target = Path::new(data_path).join(parent);
-            create_dir_all(target).map_err(|err| anyhow!("failed to create dir {}", err))?;
-        }
-        let data: Vec<u8> = DEFAULTS.get(inner_path).unwrap().iter().copied().collect();
-        let target_path = Path::new(data_path).join(inner_path_stripped);
-        write(target_path.clone(), data).map_err(|err| anyhow!("failed to write file {}", err))?;
-        if let Some(repo_instance) = repo.as_mut() {
-            println!("adding {:?}", inner_path_stripped);
-            // add a file to repository
-            let mut index = repo_instance
-                .index()
-                .map_err(|err| anyhow!("Failed to get repo index ({})", err))?;
-            index
-                .add_path(inner_path_stripped)
-                .map_err(|err| anyhow!("Failed to add a file {} ({})", data_path, err))?;
-            index
-                .write()
-                .map_err(|err| anyhow!("Failed to write to index ({})", err))?;
-        }
+        match inner_path {
+            DirEntry::File(file) => {
+                let relative_path = file.path();
+                let full = Path::new(data_path).join(relative_path);
+                write(full.clone(), file.contents())
+                    .map_err(|err| anyhow!("failed to write file {}", err))?;
+                if let Some(repo_instance) = repo.as_mut() {
+                    println!("adding {:?}", relative_path);
+                    // add a file to repository
+                    let mut index = repo_instance
+                        .index()
+                        .map_err(|err| anyhow!("Failed to get repo index ({})", err))?;
+                    index
+                        .add_path(relative_path)
+                        .map_err(|err| anyhow!("Failed to add a file {} ({})", data_path, err))?;
+                    index
+                        .write()
+                        .map_err(|err| anyhow!("Failed to write to index ({})", err))?;
+                }
+            }
+            DirEntry::Dir(dir) => {
+                let full = Path::new(data_path).join(dir.path());
+                create_dir_all(full.clone())
+                    .map_err(|err| anyhow!("failed to create dir {}", err))?;
+            }
+        };
     }
     Ok(())
 }
