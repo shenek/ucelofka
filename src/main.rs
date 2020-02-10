@@ -1,23 +1,31 @@
 pub mod actions;
 pub mod data;
+pub mod translations;
 
 use anyhow::{anyhow, Result};
 use clap::{
     crate_authors, crate_description, crate_name, crate_version, App, Arg, ArgMatches, SubCommand,
     Values,
 };
+use fluent::fluent_args;
 use std::io;
 use std::path::{Path, PathBuf};
 
-use crate::actions::{account, customer, entry, identity, invoice, project};
+use crate::{
+    actions::{account, customer, entry, identity, invoice, project},
+    translations::{get_message, texts},
+};
 
 pub fn check_data_dir(path_str: String) -> Result<()> {
     let root_dir: &Path = Path::new(&path_str);
     if let Ok(path) = root_dir.canonicalize() {
         if !path.is_dir() {
-            return Err(anyhow!("{} is not directory", path_str));
+            return Err(anyhow!(get_message(
+                "is-not-a-directory",
+                Some(fluent_args!["path" => path_str])
+            )));
         }
-        for subdir in &[
+        for &subdir in &[
             "accounts",
             "customers",
             "entries",
@@ -28,16 +36,21 @@ pub fn check_data_dir(path_str: String) -> Result<()> {
         ] {
             let subdir_path = path.join(Path::new(subdir));
             if !subdir_path.is_dir() {
-                return Err(anyhow!(
-                    "data directory {} is missing {} subdir",
-                    root_dir.to_str().unwrap_or("?"),
-                    subdir
-                ));
+                return Err(anyhow!(get_message(
+                    "data-directory-is-missing-subdir",
+                    Some(fluent_args![
+                        "dir_path" => root_dir.to_str().unwrap_or("?"),
+                        "subdir_path" => subdir
+                    ]),
+                )));
             }
         }
         Ok(())
     } else {
-        Err(anyhow!("{} path does not exist", path_str))
+        Err(anyhow!(get_message(
+            "path-not-exits",
+            Some(fluent_args!["path" => path_str])
+        )))
     }
 }
 
@@ -49,7 +62,7 @@ fn prepare_data_dir() -> Arg<'static, 'static> {
         .takes_value(true)
         .required(false)
         .validator(|s| check_data_dir(s).map_err(|e| e.to_string()))
-        .help("path to data directory")
+        .help(&texts::DATA_DIRECTORY_PATH)
         .default_value(".")
 }
 
