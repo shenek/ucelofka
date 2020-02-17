@@ -233,6 +233,7 @@ mod identity {
 
 mod invoice {
     use super::{prepare_project, test_cmd};
+    use assert_cmd::Command;
 
     fn invoice(path: &str, git: bool) -> String {
         let args = if git {
@@ -293,6 +294,68 @@ mod invoice {
             &[],
             &["invoices:", &format!("id: {}", invoice_id)],
         );
+    }
+
+    #[test]
+    fn create_entries_with_different_currencies() {
+        let project_dir = prepare_project(false);
+
+        test_cmd(
+            "entry",
+            "create",
+            project_dir.path().to_str().unwrap(),
+            &[
+                "--id",
+                "002_czk_entry",
+                "--currency",
+                "CZK",
+                "--name",
+                "hard czech work",
+                "--price",
+                "99.9",
+            ],
+            &[],
+        );
+        test_cmd(
+            "entry",
+            "create",
+            project_dir.path().to_str().unwrap(),
+            &[
+                "--id",
+                "003_usd_entry",
+                "--currency",
+                "USD",
+                "--name",
+                "hard english work",
+                "--price",
+                "99.9",
+            ],
+            &[],
+        );
+
+        let assert = Command::cargo_bin("ucelofka")
+            .unwrap()
+            .arg("invoice")
+            .arg("--path")
+            .arg(project_dir.path().to_str().unwrap())
+            .args(vec![
+                "create",
+                "--account",
+                "first_account",
+                "--customer",
+                "first_customer",
+                "--identity",
+                "first_identity",
+                "--entry",
+                "002_czk_entry",
+                "--entry",
+                "003_usd_entry",
+            ])
+            .assert()
+            .failure();
+
+        let stderr = String::from_utf8(assert.get_output().stderr.clone()).unwrap();
+        assert!(stderr.contains("CZK, USD"));
     }
 
     #[test]

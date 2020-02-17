@@ -1,6 +1,7 @@
 use anyhow::{anyhow, Result};
+use fluent::fluent_args;
 use git2::Repository;
-use std::{convert::TryInto, fs, path::Path};
+use std::{collections::HashSet, convert::TryInto, fs, path::Path};
 use tera::{Context, Tera};
 
 use crate::{
@@ -10,6 +11,7 @@ use crate::{
         template::Templates,
         Record, Records,
     },
+    translations::get_message,
 };
 
 pub fn create(
@@ -28,6 +30,18 @@ pub fn create(
         let entry_item = actions::entry::get(data_path, entry)?;
         entries_vec.push(entry_item);
     }
+    // Test same currencies among entries
+    let currencies: HashSet<String> = entries_vec.iter().map(|e| e.currency.clone()).collect();
+    if currencies.len() > 1 {
+        let mut currencies_vec = currencies.iter().map(String::as_str).collect::<Vec<_>>();
+        currencies_vec.sort();
+        let currencies_str = currencies_vec.join(", ");
+        return Err(anyhow!(get_message(
+            "entries-different-invoice",
+            Some(fluent_args!["currencies" => currencies_str])
+        )));
+    }
+
     let invoices = list(data_path);
     let new_invoice = Invoice::new(
         identity,
