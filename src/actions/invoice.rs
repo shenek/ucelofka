@@ -118,7 +118,9 @@ pub fn render(data_path: &Path, invoice: &str, template: &str, git: bool) -> Res
         )
     })?;
 
-    let context: Context = data.try_into()?;
+    let currency = data.entries[0].currency.clone();
+    let mut context: Context = data.try_into()?;
+    context.insert("currency", &currency);
     let output = match renderer.render(&template_instance.name[..], &context) {
         Ok(data) => data,
         Err(err) => return Err(anyhow!("{}", err)),
