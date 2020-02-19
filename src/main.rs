@@ -315,12 +315,20 @@ fn process_invoice(app: App, matches: &ArgMatches<'static>) -> Result<()> {
             println!("Created invoice {}", new_id);
         }
         ("render", Some(render_matches)) => {
-            invoice::render(
+            let invoice_id = render_matches.value_of("invoice").unwrap();
+            let filename = invoice::render(
                 data_path.as_ref(),
-                render_matches.value_of("invoice").unwrap(),
+                invoice_id,
                 render_matches.value_of("template").unwrap(),
                 render_matches.is_present("git"),
             )?;
+            println!(
+                "{}",
+                get_message(
+                    "invoice-rendered",
+                    Some(fluent_args!["filename" => filename, "invoice" => invoice_id])
+                )
+            );
         }
         ("list", Some(_)) => {
             println!("{}", invoice::list(&data_path)?);

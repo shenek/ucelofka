@@ -90,7 +90,7 @@ pub fn get(data_path: &Path, id: &str) -> Result<Invoice> {
         .ok_or_else(|| anyhow!("Invoice {} not found.", id))?)
 }
 
-pub fn render(data_path: &Path, invoice: &str, template: &str, git: bool) -> Result<()> {
+pub fn render(data_path: &Path, invoice: &str, template: &str, git: bool) -> Result<String> {
     // get the invoice data
     let invoice_path = data_path.join(Path::new("invoices"));
     let invoices = Invoices::load(invoice_path.as_path())?;
@@ -160,5 +160,5 @@ pub fn render(data_path: &Path, invoice: &str, template: &str, git: bool) -> Res
         })?;
     }
 
-    Ok(())
+    Ok(output_path.to_str().unwrap().into())
 }

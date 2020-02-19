@@ -406,7 +406,7 @@ mod invoice {
             "render",
             project_dir.path().to_str().unwrap(),
             &["--invoice", &invoice_id, "--template", "default.html"],
-            &[],
+            &[&invoice_id],
         );
 
         let project_dir = prepare_project(true);
@@ -423,7 +423,7 @@ mod invoice {
                 "default.html",
                 "--git",
             ],
-            &[],
+            &[&invoice_id],
         );
     }
 }
