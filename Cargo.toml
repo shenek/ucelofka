@@ -10,7 +10,7 @@ keywords = ["cli", "invoice", "git"]
 repository = "https://github.com/shenek/ucelofka"
 categories = ["command-line-utilities"]
 
-include = ["default", "src"]
+include = ["default", "resources", "src"]
 
 [dependencies]
 anyhow = "~1.0.26"
