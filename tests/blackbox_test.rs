@@ -231,9 +231,11 @@ mod identity {
     }
 }
 
+#[cfg(test)]
 mod invoice {
     use super::{prepare_project, test_cmd};
     use assert_cmd::Command;
+    use test_case::test_case;
 
     fn invoice(path: &str, git: bool) -> String {
         let args = if git {
@@ -396,8 +398,9 @@ mod invoice {
         );
     }
 
-    #[test]
-    fn render() {
+    #[test_case("default.html" ; "english template")]
+    #[test_case("default-cz.html" ; "czech template")]
+    fn render(template: &str) {
         let project_dir = prepare_project(false);
         let invoice_id = invoice(project_dir.path().to_str().unwrap(), false);
 
@@ -405,7 +408,7 @@ mod invoice {
             "invoice",
             "render",
             project_dir.path().to_str().unwrap(),
-            &["--invoice", &invoice_id, "--template", "default.html"],
+            &["--invoice", &invoice_id, "--template", template],
             &[&invoice_id],
         );
 
@@ -416,13 +419,7 @@ mod invoice {
             "invoice",
             "render",
             project_dir.path().to_str().unwrap(),
-            &[
-                "--invoice",
-                &invoice_id,
-                "--template",
-                "default.html",
-                "--git",
-            ],
+            &["--invoice", &invoice_id, "--template", template, "--git"],
             &[&invoice_id],
         );
     }

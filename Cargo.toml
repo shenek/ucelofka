@@ -31,6 +31,7 @@ unic-langid = { version = "0.7.1", features = ["macros"]}
 [dev-dependencies]
 assert_cmd = "0.12"
 tempfile = "3.1"
+test-case = "1.0.0"
 
 [[bin]]
 name = "ucelofka"

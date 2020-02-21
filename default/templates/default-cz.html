@@ -1,0 +1,326 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Invoice {{ id }}</title>
+    <style>
+
+    @media print {
+        body {
+            width: 21cm;
+            height: 29.7cm;
+       }
+    }
+
+    .invoice-box {
+        max-width: 21cm;
+        margin: auto;
+        padding: 2cm;
+        font-size: 16px;
+        line-height: 24px;
+        font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+        color: #555;
+    }
+
+    .invoice-box table {
+        width: 100%;
+        line-height: inherit;
+        text-align: left;
+    }
+
+    .invoice-box table td {
+        padding: 5px;
+        vertical-align: top;
+    }
+
+    .invoice-box table tr td:nth-child(2) {
+        text-align: right;
+    }
+
+    .invoice-box table tr.top table td {
+        padding-bottom: 20px;
+    }
+
+    .invoice-box table tr.top table td.title {
+        font-size: 45px;
+        line-height: 45px;
+        color: #333;
+    }
+
+    .invoice-box table tr.information table td {
+        padding-bottom: 0px;
+        padding-top: 0px;
+    }
+
+    .invoice-box table tr.information table th {
+        padding-bottom: 0px;
+        padding-top: 0px;
+        font-weight: bold;
+    }
+
+    .invoice-box table tr.information table tr:first-child td {
+        text-align: left;
+        padding-bottom: 1ex;
+    }
+
+    .invoice-box table tr.information table td:nth-child(2) {
+        text-align: left;
+    }
+
+    .invoice-box table tr.information table th:nth-child(2) {
+        text-align: left;
+        padding-left: 5px;
+    }
+
+    .invoice-box table tr.information table td:nth-child(1) {
+        padding-left: 1em;
+        text-align: right;
+    }
+
+    .invoice-box table tr.information table {
+        margin-bottom: 2em;
+    }
+
+    .invoice-box table tr.heading td {
+        background: #eee;
+        border-bottom: 1px solid #ddd;
+        font-weight: bold;
+    }
+
+    .invoice-box table tr.details td {
+        padding-bottom: 20px;
+    }
+
+    .invoice-box table tr.item td{
+        border-bottom: 1px solid #eee;
+    }
+
+    .invoice-box table tr.item.last td {
+        border-bottom: none;
+    }
+
+    .invoice-box table tr.total td {
+        border-top: 2px solid #eee;
+        font-weight: bold;
+    }
+
+    @media only screen and (max-width: 600px) {
+        .invoice-box table tr.top table td {
+            width: 100%;
+            display: block;
+            text-align: center;
+        }
+
+        .invoice-box table tr.information table td {
+            width: 100%;
+            display: block;
+            text-align: center;
+        }
+    }
+
+    .invoice-box table tr.item ul {
+        margin-top: 0.2em;
+    }
+
+    .invoice-box table tr.item li {
+        list-style-type: none;
+    }
+
+    /** RTL **/
+    .rtl {
+        direction: rtl;
+        font-family: Tahoma, 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+    }
+
+    .rtl table {
+        text-align: right;
+    }
+
+    .rtl table tr td:nth-child(2) {
+        text-align: left;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="invoice-box">
+        <table cellpadding="0" cellspacing="0">
+            <tr class="top">
+                <td colspan="2">
+                    <table>
+                        <tr>
+                            <td class="title">
+                                <!--<img src="https://www.sparksuite.com/images/logo.png" style="width:100%; max-width:300px;"> -->
+                                Faktura
+                            </td>
+                            <td>
+                                Faktura #: {{ id }}<br/>
+                                Vydáno: {{ issue_day }}<br/>
+                                Splatnost: {{ due_day  }}<br/>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr class="information">
+                <td>
+                    <table>
+                        <tr>
+                            <td colspan=2>Dodavatel:</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <th>{{ issuer.name }}</th>
+                        </tr>
+                        <tr>
+                            <td>Adresa</td>
+                            <td>
+                            {% for line in issuer.address %}
+                                {{ line }}<br/>
+                            {% endfor %}
+                            </td>
+                        </tr>
+                        {% if issuer.phone %}
+                        <tr>
+                            <td>Telefon</td>
+                            <td>
+                            {% for line in issuer.phone %}
+                                {{ line }}<br/>
+                            {% endfor %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% if issuer.email %}
+                        <tr>
+                            <td>Email</td>
+                            <td>
+                            {% for line in issuer.email %}
+                                {{ line }}<br/>
+                            {% endfor %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% if issuer.www %}
+                        <tr>
+                            <td>www</td>
+                            <td>
+                            {% for line in issuer.www %}
+                                {{ line }}<br/>
+                            {% endfor %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <td>IČ / DIČ</td>
+                            <td>{{ issuer.identification.registration }} / {{ issuer.identification.tax }}</td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    <table>
+                        <tr>
+                            <td colspan=2>Objednavatel:</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <th>{{ customer.name }}</th>
+                        </tr>
+                        <tr>
+                            <td>Adresa</td>
+                            <td>
+                            {% for line in customer.address %}
+                                {{ line }}<br/>
+                            {% endfor %}
+                            </td>
+                        </tr>
+                        {% if customer.email %}
+                        <tr>
+                            <td>
+                                Email
+                            </td>
+                            <td>
+                            {% for line in customer.email %}
+                                {{ line }}<br/>
+                            {% endfor %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <td>IČ / DIČ</td>
+                            <td>{{ customer.identification }}</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr class="heading">
+                <td>
+                    Položka
+                </td>
+
+                <td>
+                    Cena ({{ currency }})
+                </td>
+            </tr>
+            {% for item in entries %}
+            <tr class="item">
+                <td>{{ item.name }}
+                    <ul>
+                {% for line in item.details %}
+                        <li><small>{{ line }}</small></li>
+                {% endfor %}
+                    <ul>
+                </td>
+                <td>{{ item.price|round(precision=2) }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total">
+                <td></td>
+                <td>
+                    Celkem: {{ billing.total|round(precision=2) }}<br/><br/>
+                </td>
+            </tr>
+            <tr class="heading">
+                <td>
+                    Platba
+                </td>
+                <td>
+                </td>
+            </tr>
+            <tr class="information">
+                <td colspan="2">
+                    <table>
+                        <tr>
+                            <th colspan=2>Bankovní převod</th>
+                        </tr>
+                        <tr>
+                            <td style="width:20%">Číslo účtu</td>
+                            <th style="width:80%">{{ billing.account_number }}</th>
+                        <tr>
+                        </tr>
+                            <td>IBAN</td>
+                            <th>{{ billing.IBAN }}</th>
+                        </tr>
+                        </tr>
+                            <td>SWIFT</td>
+                            <th>{{ billing.BIC }}</th>
+                        </tr>
+                        </tr>
+                            <td>Variabilní symbol</td>
+                            <th>{{ id }}</th>
+                        </tr>
+                        </tr>
+                            <td>Částka</td>
+                            <th>{{ billing.total|round(precision=2) }}</th>
+                        </tr>
+                        </tr>
+                            <td>Měna</td>
+                            <th>{{ currency }}</th>
+                        </tr>
+                    </table>
+                </td>
+
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
