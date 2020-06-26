@@ -79,6 +79,11 @@ pub fn create(
     Ok(new_invoice.id.to_string())
 }
 
+pub fn ids(data_path: &Path) -> Result<String> {
+    let data = list(data_path)?;
+    Ok(data.ids().join("\n"))
+}
+
 pub fn list(data_path: &Path) -> Result<Invoices> {
     let invoice_path = data_path.join(Path::new("invoices"));
     Ok(Invoices::load(invoice_path.as_path())?)

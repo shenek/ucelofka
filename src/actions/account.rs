@@ -6,6 +6,11 @@ use crate::data::{
     Records,
 };
 
+pub fn ids(data_path: &Path) -> Result<String> {
+    let data = list(data_path)?;
+    Ok(data.ids().join("\n"))
+}
+
 pub fn list(data_path: &Path) -> Result<Accounts> {
     let account_path = data_path.join(Path::new("accounts"));
     Ok(Accounts::load(account_path.as_path())?)

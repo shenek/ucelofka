@@ -70,6 +70,10 @@ where
         Ok(res)
     }
 
+    fn ids(&'a self) -> Vec<String> {
+        self.records().iter().map(|r| r.id()).collect()
+    }
+
     fn load_records(paths: Vec<PathBuf>) -> Result<Vec<ITEM>> {
         let mut res: Vec<ITEM> = Vec::new();
 

@@ -70,6 +70,19 @@ mod account {
     }
 
     #[test]
+    fn ids() {
+        let project_dir = prepare_project(false);
+
+        test_cmd(
+            "account",
+            "ids",
+            project_dir.path().to_str().unwrap(),
+            &[],
+            &["first_account"],
+        );
+    }
+
+    #[test]
     fn get() {
         let project_dir = prepare_project(false);
 
@@ -100,6 +113,19 @@ mod customer {
     }
 
     #[test]
+    fn ids() {
+        let project_dir = prepare_project(false);
+
+        test_cmd(
+            "customer",
+            "ids",
+            project_dir.path().to_str().unwrap(),
+            &[],
+            &["first_customer"],
+        );
+    }
+
+    #[test]
     fn get() {
         let project_dir = prepare_project(false);
 
@@ -126,6 +152,19 @@ mod entry {
             project_dir.path().to_str().unwrap(),
             &[],
             &["entries:", "id: 001_first_entry"],
+        );
+    }
+
+    #[test]
+    fn ids() {
+        let project_dir = prepare_project(false);
+
+        test_cmd(
+            "entry",
+            "ids",
+            project_dir.path().to_str().unwrap(),
+            &[],
+            &["001_first_entry"],
         );
     }
 
@@ -227,6 +266,19 @@ mod identity {
             project_dir.path().to_str().unwrap(),
             &[],
             &["identities:", "id: first_identity"],
+        );
+    }
+
+    #[test]
+    fn ids() {
+        let project_dir = prepare_project(false);
+
+        test_cmd(
+            "identity",
+            "ids",
+            project_dir.path().to_str().unwrap(),
+            &[],
+            &["first_identity"],
         );
     }
 }
@@ -370,6 +422,19 @@ mod invoice {
             project_dir.path().to_str().unwrap(),
             &[],
             &["invoices:"],
+        );
+    }
+
+    #[test]
+    fn ids() {
+        let project_dir = prepare_project(false);
+
+        test_cmd(
+            "invoice",
+            "ids",
+            project_dir.path().to_str().unwrap(),
+            &[],
+            &[],
         );
     }
 

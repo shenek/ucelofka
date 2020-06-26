@@ -132,6 +132,7 @@ fn prepare_invoice_subcommand() -> App<'static, 'static> {
                 ),
         )
         .subcommand(SubCommand::with_name("list").about("Lists invoices"))
+        .subcommand(SubCommand::with_name("ids").about("List invoice ids"))
         .subcommand(
             SubCommand::with_name("render")
                 .about("Renders invoice")
@@ -194,7 +195,8 @@ fn prepare_account_subcommand() -> App<'static, 'static> {
     SubCommand::with_name("account")
         .arg(prepare_data_dir())
         .about("Account management")
-        .subcommand(SubCommand::with_name("list").about("Lists account"))
+        .subcommand(SubCommand::with_name("list").about("Lists accounts"))
+        .subcommand(SubCommand::with_name("ids").about("Lists accounts ids"))
         .subcommand(prepare_get_subcommand("Get account"))
 }
 
@@ -203,6 +205,7 @@ fn prepare_customer_subcommand() -> App<'static, 'static> {
         .arg(prepare_data_dir())
         .about("Customer management")
         .subcommand(SubCommand::with_name("list").about("Lists customers"))
+        .subcommand(SubCommand::with_name("ids").about("Lists customers ids"))
         .subcommand(prepare_get_subcommand("Get customer"))
 }
 
@@ -211,6 +214,7 @@ fn prepare_entry_subcommand() -> App<'static, 'static> {
         .arg(prepare_data_dir())
         .about("Entry management")
         .subcommand(SubCommand::with_name("list").about("Lists entries"))
+        .subcommand(SubCommand::with_name("ids").about("Lists entries ids"))
         .subcommand(prepare_get_subcommand("Get entry"))
         .subcommand(
             SubCommand::with_name("create")
@@ -273,6 +277,7 @@ fn prepare_identity_subcommand() -> App<'static, 'static> {
         .arg(prepare_data_dir())
         .about("Identity management")
         .subcommand(SubCommand::with_name("list").about("Lists identities"))
+        .subcommand(SubCommand::with_name("ids").about("Lists identities ids"))
         .subcommand(prepare_get_subcommand("Get identity"))
 }
 
@@ -333,6 +338,9 @@ fn process_invoice(app: App, matches: &ArgMatches<'static>) -> Result<()> {
         ("list", Some(_)) => {
             println!("{}", invoice::list(&data_path)?);
         }
+        ("ids", Some(_)) => {
+            println!("{}", invoice::ids(&data_path)?);
+        }
         ("get", Some(get_matches)) => {
             let invoice_id = get_matches.value_of("id").unwrap();
             let invoice = invoice::get(&data_path, invoice_id)?;
@@ -362,6 +370,9 @@ fn process_accounts(app: App, matches: &ArgMatches<'static>) -> Result<()> {
         ("list", Some(_)) => {
             println!("{}", account::list(&data_path)?);
         }
+        ("ids", Some(_)) => {
+            println!("{}", account::ids(&data_path)?);
+        }
         ("get", Some(get_matches)) => {
             let account_id = get_matches.value_of("id").unwrap();
             let account = account::get(&data_path, account_id)?;
@@ -378,6 +389,9 @@ fn process_customer(app: App, matches: &ArgMatches<'static>) -> Result<()> {
         ("list", Some(_)) => {
             println!("{}", customer::list(&data_path)?);
         }
+        ("ids", Some(_)) => {
+            println!("{}", customer::ids(&data_path)?);
+        }
         ("get", Some(get_matches)) => {
             let customer_id = get_matches.value_of("id").unwrap();
             let customer = customer::get(&data_path, customer_id)?;
@@ -393,6 +407,9 @@ fn process_entry(app: App, matches: &ArgMatches<'static>) -> Result<()> {
     match matches.subcommand() {
         ("list", Some(_)) => {
             println!("{}", entry::list(&data_path)?);
+        }
+        ("ids", Some(_)) => {
+            println!("{}", entry::ids(&data_path)?);
         }
         ("get", Some(get_matches)) => {
             let entry_id = get_matches.value_of("id").unwrap();
@@ -423,6 +440,9 @@ fn process_identity(app: App, matches: &ArgMatches<'static>) -> Result<()> {
     match matches.subcommand() {
         ("list", Some(_)) => {
             println!("{}", identity::list(&data_path)?);
+        }
+        ("ids", Some(_)) => {
+            println!("{}", identity::ids(&data_path)?);
         }
         ("get", Some(get_matches)) => {
             let identity_id = get_matches.value_of("id").unwrap();
