@@ -34,7 +34,7 @@ pub fn create(
     let currencies: HashSet<String> = entries_vec.iter().map(|e| e.currency.clone()).collect();
     if currencies.len() > 1 {
         let mut currencies_vec = currencies.iter().map(String::as_str).collect::<Vec<_>>();
-        currencies_vec.sort();
+        currencies_vec.sort_unstable();
         let currencies_str = currencies_vec.join(", ");
         return Err(anyhow!(get_message(
             "entries-different-invoice",
