@@ -1,10 +1,12 @@
 use anyhow::{anyhow, Result};
-use fluent_bundle::{FluentArgs, FluentBundle, FluentResource};
+use fluent_bundle::{concurrent::FluentBundle, FluentArgs, FluentResource};
 use fluent_langneg::{negotiate_languages, NegotiationStrategy};
 use include_dir::{include_dir, Dir, DirEntry};
 use lazy_static::lazy_static;
-use std::env;
-use std::str::{from_utf8, FromStr};
+use std::{
+    env,
+    str::{from_utf8, FromStr},
+};
 use unic_langid::{langid, LanguageIdentifier};
 
 const DEFAULT_LANG_STR: &str = "en-US";
