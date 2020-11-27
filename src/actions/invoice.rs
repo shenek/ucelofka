@@ -74,6 +74,9 @@ pub fn create(
                 err
             )
         })?;
+        index
+            .write()
+            .map_err(|err| anyhow!("Failed to write to index ({})", err))?;
     }
 
     Ok(new_invoice.id.to_string())
@@ -163,6 +166,9 @@ pub fn render(data_path: &Path, invoice: &str, template: &str, git: bool) -> Res
                 err
             )
         })?;
+        index
+            .write()
+            .map_err(|err| anyhow!("Failed to write to index ({})", err))?;
     }
 
     Ok(output_path.to_str().unwrap().into())
