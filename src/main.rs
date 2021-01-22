@@ -1,6 +1,7 @@
 pub mod actions;
 pub mod data;
 pub mod translations;
+pub mod web;
 
 use anyhow::{anyhow, Result};
 use clap::{
@@ -281,6 +282,21 @@ fn prepare_identity_subcommand() -> App<'static, 'static> {
         .subcommand(prepare_get_subcommand("Get identity"))
 }
 
+fn prepare_web() -> App<'static, 'static> {
+    SubCommand::with_name("web")
+        .arg(prepare_data_dir())
+        .arg(
+            Arg::with_name("port")
+                .env("UCELOFKA_PORT")
+                .help("Port which will be used for the web server")
+                .long("port")
+                .takes_value(true)
+                .required(false)
+                .default_value("8080"),
+        )
+        .about("start webserver frontend for ucelofka")
+}
+
 fn prepare_app() -> App<'static, 'static> {
     App::new(crate_name!())
         .author(crate_authors!())
@@ -292,6 +308,7 @@ fn prepare_app() -> App<'static, 'static> {
         .subcommand(prepare_customer_subcommand())
         .subcommand(prepare_entry_subcommand())
         .subcommand(prepare_identity_subcommand())
+        .subcommand(prepare_web())
 }
 
 fn get_data_dir(matches: &ArgMatches<'static>) -> PathBuf {
@@ -454,6 +471,19 @@ fn process_identity(app: App, matches: &ArgMatches<'static>) -> Result<()> {
     Ok(())
 }
 
+fn process_web(_app: App, matches: &ArgMatches<'static>) -> Result<()> {
+    let data_path = get_data_dir(matches);
+    let port_str = matches.value_of("port").unwrap();
+    let port: u16 = port_str.parse::<u16>().map_err(|_| {
+        anyhow!(get_message(
+            "not-a-port-number",
+            Some(fluent_args!["port" => port_str])
+        ))
+    })?;
+    web::run(port, data_path)?;
+    Ok(())
+}
+
 fn main() -> Result<()> {
     let app = prepare_app();
 
@@ -466,6 +496,7 @@ fn main() -> Result<()> {
         ("customer", Some(customer_matches)) => process_customer(app.clone(), customer_matches)?,
         ("entry", Some(entry_matches)) => process_entry(app.clone(), entry_matches)?,
         ("identity", Some(identity_matches)) => process_identity(app.clone(), identity_matches)?,
+        ("web", Some(web_matches)) => process_web(app.clone(), web_matches)?,
         _ => exit_on_parse_error(app),
     }
     Ok(())

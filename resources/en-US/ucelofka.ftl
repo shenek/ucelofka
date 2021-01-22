@@ -9,3 +9,4 @@ response-msg =
         [one] "{ $input }" has one Collatz step.
        *[other] "{ $input }" has { $value } Collatz steps.
     }
+not-a-port-number = `{ $port }` is not a valid port number
