@@ -3,6 +3,7 @@ mod customer;
 mod entry;
 mod identity;
 mod invoice;
+mod r#static;
 
 use std::{fmt, path::PathBuf, sync::Mutex};
 
@@ -43,11 +44,15 @@ async fn actix_main(port: u16, data_dir: PathBuf) -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(data.clone())
-            .service(account::account_endpoint())
-            .service(customer::customer_endpoint())
-            .service(entry::entry_endpoint())
-            .service(identity::identity_endpoint())
-            .service(invoice::invoice_endpoint())
+            .service(
+                web::scope("api")
+                    .service(account::account_endpoint())
+                    .service(customer::customer_endpoint())
+                    .service(entry::entry_endpoint())
+                    .service(identity::identity_endpoint())
+                    .service(invoice::invoice_endpoint()),
+            )
+            .service(r#static::static_endpoint())
     })
     .bind(("localhost", port))?
     .workers(1)
