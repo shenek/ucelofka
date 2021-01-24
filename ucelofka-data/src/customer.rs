@@ -1,8 +1,6 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use std::{convert::TryFrom, fmt, path::Path};
-
-use super::{Record, Records};
+use std::{convert::TryFrom, fmt};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Customer {
@@ -11,12 +9,6 @@ pub struct Customer {
     pub address: Vec<String>,
     pub identification: String,
     pub email: Vec<String>,
-}
-
-impl Record for Customer {
-    fn id(&self) -> String {
-        self.id.clone()
-    }
 }
 
 impl fmt::Display for Customer {
@@ -29,21 +21,6 @@ impl fmt::Display for Customer {
 #[derive(Debug, Default, Deserialize, Serialize, Clone)]
 pub struct Customers {
     pub customers: Vec<Customer>,
-}
-
-impl<'a> Records<'a, Customer> for Customers {
-    fn new(customers: Vec<Customer>) -> Self {
-        Self { customers }
-    }
-
-    fn load(dir: &Path) -> Result<Self> {
-        let paths = Self::list_directory(dir)?;
-        Ok(Self::new(Self::load_records(paths)?))
-    }
-
-    fn records(&'a self) -> &'a [Customer] {
-        &self.customers
-    }
 }
 
 impl fmt::Display for Customers {

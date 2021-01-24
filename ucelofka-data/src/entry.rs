@@ -1,8 +1,6 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use std::{convert::TryFrom, fmt, path::Path};
-
-use super::{Record, Records};
+use std::{convert::TryFrom, fmt};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Entry {
@@ -31,12 +29,6 @@ impl Entry {
     }
 }
 
-impl Record for Entry {
-    fn id(&self) -> String {
-        self.id.clone()
-    }
-}
-
 impl fmt::Display for Entry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", serde_yaml::to_string(self).unwrap())?;
@@ -47,21 +39,6 @@ impl fmt::Display for Entry {
 #[derive(Debug, Default, Deserialize, Serialize, Clone)]
 pub struct Entries {
     pub entries: Vec<Entry>,
-}
-
-impl<'a> Records<'a, Entry> for Entries {
-    fn new(entries: Vec<Entry>) -> Self {
-        Self { entries }
-    }
-
-    fn load(dir: &Path) -> Result<Self> {
-        let paths = Self::list_directory(dir)?;
-        Ok(Self::new(Self::load_records(paths)?))
-    }
-
-    fn records(&'a self) -> &'a [Entry] {
-        &self.entries
-    }
 }
 
 impl fmt::Display for Entries {

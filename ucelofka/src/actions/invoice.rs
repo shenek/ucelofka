@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result};
 use fluent::fluent_args;
 use git2::Repository;
-use std::{collections::HashSet, convert::TryInto, fs, path::Path};
+use std::{collections::HashSet, convert::TryFrom, convert::TryInto, fs, path::Path};
 use tera::{Context, Tera};
 
 use crate::{
@@ -9,10 +9,25 @@ use crate::{
     data::{
         invoice::{Invoice, Invoices},
         template::Templates,
-        Record, Records,
     },
+    storage::{Record, Records},
     translations::get_message,
 };
+
+struct WrappedInvoice(Invoice);
+
+impl TryFrom<WrappedInvoice> for Context {
+    type Error = anyhow::Error;
+    fn try_from(wrapped_invoice: WrappedInvoice) -> Result<Self> {
+        Ok(Self::from_serialize(wrapped_invoice.0).map_err(anyhow::Error::from)?)
+    }
+}
+
+impl Into<WrappedInvoice> for Invoice {
+    fn into(self) -> WrappedInvoice {
+        WrappedInvoice(self)
+    }
+}
 
 pub fn create(
     data_path: &Path,
@@ -127,7 +142,8 @@ pub fn render(data_path: &Path, invoice: &str, template: &str, git: bool) -> Res
     })?;
 
     let currency = data.entries[0].currency.clone();
-    let mut context: Context = data.try_into()?;
+    let wrapped_invoice: WrappedInvoice = data.into();
+    let mut context: Context = wrapped_invoice.try_into()?;
     context.insert("currency", &currency);
     let output = match renderer.render(&template_instance.name[..], &context) {
         Ok(data) => data,

@@ -3,11 +3,9 @@
 use anyhow::Result;
 use chrono::{Datelike, Duration, Utc};
 use serde::{Deserialize, Serialize};
-use std::{convert::TryFrom, fmt, path::Path};
-use tera::Context;
+use std::{convert::TryFrom, fmt};
 
-use super::{Record, Records};
-use crate::data;
+use crate::{account, customer, entry, identity};
 
 const DEFAULT_DUE: i64 = 15; // in days
 
@@ -65,23 +63,10 @@ pub struct Invoice {
     pub billing: Billing,
 }
 
-impl Record for Invoice {
-    fn id(&self) -> String {
-        self.id.to_string()
-    }
-}
-
 impl fmt::Display for Invoice {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", serde_yaml::to_string(self).unwrap())?;
         Ok(())
-    }
-}
-
-impl TryFrom<Invoice> for Context {
-    type Error = anyhow::Error;
-    fn try_from(invoice: Invoice) -> Result<Self> {
-        Ok(Self::from_serialize(invoice).map_err(anyhow::Error::from)?)
     }
 }
 
@@ -95,10 +80,10 @@ impl Invoice {
     }
 
     pub fn new(
-        identity: data::identity::Identity,
-        account: data::account::Account,
-        customer: data::customer::Customer,
-        entries: &[data::entry::Entry],
+        identity: identity::Identity,
+        account: account::Account,
+        customer: customer::Customer,
+        entries: &[entry::Entry],
         invoices: Vec<Self>,
     ) -> Self {
         let total = entries.iter().map(|e| e.price).sum();
@@ -151,21 +136,6 @@ impl Invoice {
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Invoices {
     pub invoices: Vec<Invoice>,
-}
-
-impl<'a> Records<'a, Invoice> for Invoices {
-    fn new(invoices: Vec<Invoice>) -> Self {
-        Self { invoices }
-    }
-
-    fn load(dir: &Path) -> Result<Self> {
-        let paths = Self::list_directory(dir)?;
-        Ok(Self::new(Self::load_records(paths)?))
-    }
-
-    fn records(&'a self) -> &'a [Invoice] {
-        &self.invoices
-    }
 }
 
 impl fmt::Display for Invoices {

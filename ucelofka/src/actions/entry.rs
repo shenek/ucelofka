@@ -2,9 +2,9 @@ use anyhow::{anyhow, Result};
 use git2::Repository;
 use std::path::Path;
 
-use crate::data::{
-    entry::{Entries, Entry},
-    Record, Records,
+use crate::{
+    data::entry::{Entries, Entry},
+    storage::{Record, Records},
 };
 
 pub fn ids(data_path: &Path) -> Result<String> {

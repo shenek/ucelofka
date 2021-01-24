@@ -2383,7 +2383,18 @@ dependencies = [
  "tera",
  "test-case",
  "tokio 1.1.0",
+ "ucelofka-data",
  "unic-langid",
+]
+
+[[package]]
+name = "ucelofka-data"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "serde",
+ "serde_yaml",
 ]
 
 [[package]]

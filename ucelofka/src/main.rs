@@ -1,5 +1,5 @@
 pub mod actions;
-pub mod data;
+pub mod storage;
 pub mod translations;
 pub mod web;
 
@@ -11,6 +11,7 @@ use clap::{
 use fluent::fluent_args;
 use std::io;
 use std::path::{Path, PathBuf};
+use ucelofka_data as data;
 
 use crate::{
     actions::{account, customer, entry, identity, invoice, project},

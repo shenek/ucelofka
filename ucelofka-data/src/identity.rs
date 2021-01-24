@@ -1,8 +1,6 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use std::{convert::TryFrom, fmt, path::Path};
-
-use super::{Record, Records};
+use std::{convert::TryFrom, fmt};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Identification {
@@ -21,12 +19,6 @@ pub struct Identity {
     pub identification: Identification,
 }
 
-impl Record for Identity {
-    fn id(&self) -> String {
-        self.id.clone()
-    }
-}
-
 impl fmt::Display for Identity {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", serde_yaml::to_string(self).unwrap())?;
@@ -37,21 +29,6 @@ impl fmt::Display for Identity {
 #[derive(Debug, Default, Deserialize, Serialize, Clone)]
 pub struct Identities {
     pub identities: Vec<Identity>,
-}
-
-impl<'a> Records<'a, Identity> for Identities {
-    fn new(identities: Vec<Identity>) -> Self {
-        Self { identities }
-    }
-
-    fn load(dir: &Path) -> Result<Self> {
-        let paths = Self::list_directory(dir)?;
-        Ok(Self::new(Self::load_records(paths)?))
-    }
-
-    fn records(&'a self) -> &'a [Identity] {
-        &self.identities
-    }
 }
 
 impl fmt::Display for Identities {

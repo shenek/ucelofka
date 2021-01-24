@@ -1,9 +1,9 @@
 use anyhow::{anyhow, Result};
 use std::path::Path;
 
-use crate::data::{
-    account::{Account, Accounts},
-    Records,
+use crate::{
+    data::account::{Account, Accounts},
+    storage::Records,
 };
 
 pub fn ids(data_path: &Path) -> Result<String> {
