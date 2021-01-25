@@ -3,8 +3,11 @@ name = "ucelofka-data"
 version = "0.1.0"
 authors = ["Stepan Henek"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "Ucelofka common part between frontend and backend part"
+license = "GPL-3.0"
+readme = "README.md"
+keywords = ["invoice"]
+repository = "https://github.com/shenek/ucelofka"
 
 [dependencies]
 anyhow = "~1.0.26"

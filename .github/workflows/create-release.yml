@@ -25,6 +25,21 @@ jobs:
           toolchain: stable
           override: true
 
+      - name: Add WASM target
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Install wasm-bindgen-cli
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: wasm-bindgen-cli
+
+      - name: Install trunk
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: trunk
+
       - name: Build release binary
         uses: actions-rs/cargo@v1
         with:

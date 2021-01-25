@@ -1,0 +1,18 @@
+[package]
+name = "ucelofka-webapp"
+version = "0.1.0"
+authors = ["Stepan Henek <stepan@henek.name>"]
+edition = "2018"
+description = "Ucelofka web frontend"
+license = "GPL-3.0"
+readme = "README.md"
+keywords = ["web", "yew", "ybc"]
+repository = "https://github.com/shenek/ucelofka"
+
+
+[dependencies]
+anyhow = "1"
+console_error_panic_hook = "~0.1.6"
+ucelofka-data = { path="../ucelofka-data/" }
+yew = "0.17"
+ybc = "0.1"

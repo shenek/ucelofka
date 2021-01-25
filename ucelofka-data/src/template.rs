@@ -1,10 +1,11 @@
 use anyhow::Result;
+use serde::{Deserialize, Serialize};
 use std::{
     fmt,
     path::{Path, PathBuf},
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct Template {
     pub name: String,
     pub path: PathBuf,
@@ -26,9 +27,9 @@ impl Template {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Deserialize, Serialize, Default, PartialEq)]
 pub struct Templates {
-    templates: Vec<Template>,
+    pub templates: Vec<Template>,
 }
 
 impl Templates {

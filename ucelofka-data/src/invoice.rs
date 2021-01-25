@@ -9,7 +9,7 @@ use crate::{account, customer, entry, identity};
 
 const DEFAULT_DUE: i64 = 15; // in days
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct Billing {
     pub account_name: String,
     pub account_number: String,
@@ -20,7 +20,7 @@ pub struct Billing {
     pub variable_symbol: String,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct Entry {
     pub name: String,
     pub price: f32,
@@ -28,7 +28,7 @@ pub struct Entry {
     pub details: Vec<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct Customer {
     pub name: String,
     pub address: Vec<String>,
@@ -36,13 +36,13 @@ pub struct Customer {
     pub email: Vec<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct Identification {
     pub tax: String,
     pub registration: String,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct Issuer {
     pub name: String,
     pub address: Vec<String>,
@@ -52,7 +52,7 @@ pub struct Issuer {
     pub identification: Identification,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct Invoice {
     pub id: u64,
     pub issue_day: String,
@@ -133,7 +133,7 @@ impl Invoice {
     }
 }
 
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Invoices {
     pub invoices: Vec<Invoice>,
 }

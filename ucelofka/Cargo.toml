@@ -16,7 +16,6 @@ include = ["default", "resources", "src"]
 actix-web = "3.3"
 actix-files = "0.5"
 anyhow = "~1.0.26"
-chrono = "~0.4.10"
 clap = "~2.33.0"
 fluent = "~0.13.1"
 fluent-bundle = "~0.13.1"
@@ -26,7 +25,6 @@ lazy_static = "~1.4.0"
 include_dir = { version = "~0.6.0" }
 serde = { version = "~1.0.104", features = ["derive"]}
 serde_yaml = "~0.8.11"
-serde_json = "1"
 tera = "~1.5.0"
 tokio = { version = "1", features = ["rt", "rt-multi-thread"]}
 unic-langid = { version = "~0.9.0", features = ["macros"]}
@@ -36,6 +34,9 @@ ucelofka-data = { path="../ucelofka-data/" }
 assert_cmd = "~1.0.1"
 tempfile = "~3.1.0"
 test-case = "~1.0.0"
+
+[build-dependencies]
+trunk = "0.8"
 
 [[bin]]
 name = "ucelofka"

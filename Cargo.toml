@@ -1,0 +1,15 @@
+[workspace]
+
+members = [
+	"ucelofka",
+	"ucelofka-data",
+	#"ucelofka-webapp",
+]
+
+default-members = [
+	"ucelofka",
+]
+
+exclude = [
+	"ucelofka-webapp",
+]
