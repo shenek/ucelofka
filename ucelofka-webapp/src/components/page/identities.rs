@@ -58,13 +58,16 @@ impl Component for Identities {
                 {
                     for self.props.identities.iter().enumerate().map(|(idx, identity)| {
                         html! {
-                            <ybc::PanelBlock
-                                tag="a"
-                                onclick=self.link.callback(move |_| Messages::SelectIdentity(idx))
-                                active=Some(idx) == self.props.selected_idx
-                            >
-                                {&identity.id}
-                            </ybc::PanelBlock>
+                            <>
+                                <ybc::PanelBlock
+                                    tag="a"
+                                    onclick=self.link.callback(move |_| Messages::SelectIdentity(idx))
+                                    active=Some(idx) == self.props.selected_idx
+                                >
+                                    <span class="panel-icon"><i class="bi bi-caret-down-fill" aria-hidden="true"></i></span>
+                                    {&identity.id}
+                                </ybc::PanelBlock>
+                            </>
                         }
                     })
                 }

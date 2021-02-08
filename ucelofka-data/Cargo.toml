@@ -8,6 +8,7 @@ license = "GPL-3.0"
 readme = "README.md"
 keywords = ["invoice"]
 repository = "https://github.com/shenek/ucelofka"
+categories = ["data-structures"]
 
 [dependencies]
 anyhow = "~1.0.26"

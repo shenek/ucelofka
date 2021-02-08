@@ -8,6 +8,7 @@ license = "GPL-3.0"
 readme = "README.md"
 keywords = ["web", "yew", "ybc"]
 repository = "https://github.com/shenek/ucelofka"
+categories = ["web-programming"]
 
 
 [dependencies]

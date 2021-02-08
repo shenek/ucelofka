@@ -56,14 +56,15 @@ impl Component for Customers {
             <ybc::Container>
                 <ybc::Panel heading=html!{{"Customers"}}>
                 {
-                    for self.props.customers.iter().enumerate().map(|(idx, identity)| {
+                    for self.props.customers.iter().enumerate().map(|(idx, customer)| {
                         html! {
                             <ybc::PanelBlock
                                 tag="a"
                                 onclick=self.link.callback(move |_| Messages::SelectCustomer(idx))
                                 active=Some(idx) == self.props.selected_idx
                             >
-                                {&identity.id}
+                                <span class="panel-icon"><i class="bi bi-caret-down-fill" aria-hidden="true"></i></span>
+                                {&customer.id}
                             </ybc::PanelBlock>
                         }
                     })

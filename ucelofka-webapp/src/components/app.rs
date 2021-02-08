@@ -296,7 +296,9 @@ impl Component for App {
                         class=if self.props.selected_menu_item == MenuItem::Identities {"is-active"} else {""}
                         onclick=self.link.callback(|_| Messages::SelectMenuItem(MenuItem::Identities))
                     >
-                        {"Identities"}<ybc::Tag classes="is-pulled-right">{self.props.identities.len()}</ybc::Tag>
+                        <ybc::Icon><i class="bi bi-person"></i></ybc::Icon>
+                        {"Identities"}
+                        <ybc::Tag classes="is-pulled-right">{self.props.identities.len()}</ybc::Tag>
                     </a>
                 </li>
                 <li>
@@ -304,14 +306,18 @@ impl Component for App {
                         class=if self.props.selected_menu_item == MenuItem::Accounts {"is-active"} else {""}
                         onclick=self.link.callback(|_| Messages::SelectMenuItem(MenuItem::Accounts))
                     >
-                        {"Accounts"}<ybc::Tag classes="is-pulled-right">{self.props.accounts.len()}</ybc::Tag>
+                        <ybc::Icon><i class="bi bi-credit-card-2-front"></i></ybc::Icon>
+                        {"Accounts"}
+                        <ybc::Tag classes="is-pulled-right">{self.props.accounts.len()}</ybc::Tag>
                     </a>
                 </li>
                 <li><a
                         class=if self.props.selected_menu_item == MenuItem::Customers {"is-active"} else {""}
                         onclick=self.link.callback(|_| Messages::SelectMenuItem(MenuItem::Customers))
                     >
-                        {"Customers"}<ybc::Tag classes="is-pulled-right">{self.props.customers.len()}</ybc::Tag>
+                        <ybc::Icon><i class="bi bi-people"></i></ybc::Icon>
+                        {"Customers"}
+                        <ybc::Tag classes="is-pulled-right">{self.props.customers.len()}</ybc::Tag>
                     </a>
                 </li>
                 <li>
@@ -319,7 +325,9 @@ impl Component for App {
                         class=if self.props.selected_menu_item == MenuItem::Entries {"is-active"} else {""}
                         onclick=self.link.callback(|_| Messages::SelectMenuItem(MenuItem::Entries))
                     >
-                        {"Entries"}<ybc::Tag classes="is-pulled-right">{self.props.entries.len()}</ybc::Tag>
+                        <ybc::Icon><i class="bi bi-card-list"></i></ybc::Icon>
+                        {"Entries"}
+                        <ybc::Tag classes="is-pulled-right">{self.props.entries.len()}</ybc::Tag>
                     </a>
                 </li>
                 <li>
@@ -327,7 +335,9 @@ impl Component for App {
                         class=if self.props.selected_menu_item == MenuItem::Invoices {"is-active"} else {""}
                         onclick=self.link.callback(|_| Messages::SelectMenuItem(MenuItem::Invoices))
                     >
-                        {"Invoices"}<ybc::Tag classes="is-pulled-right">{self.props.invoices.len()}</ybc::Tag>
+                        <ybc::Icon><i class="bi bi-files"></i></ybc::Icon>
+                        {"Invoices"}
+                        <ybc::Tag classes="is-pulled-right">{self.props.invoices.len()}</ybc::Tag>
                     </a>
                 </li>
             </>

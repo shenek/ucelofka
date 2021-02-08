@@ -73,6 +73,7 @@ impl Component for Invoices {
                                 onclick=self.link.callback(move |_| Messages::SelectInvoice(idx))
                                 active=Some(idx) == self.props.selected_idx
                             >
+                                <span class="panel-icon"><i class="bi bi-caret-down-fill" aria-hidden="true"></i></span>
                                 {&invoice.id}
                             </ybc::PanelBlock>
                         }

@@ -56,14 +56,15 @@ impl Component for Entries {
             <ybc::Container>
                 <ybc::Panel heading=html!{{"Entries"}}>
                 {
-                    for self.props.entries.iter().enumerate().map(|(idx, identity)| {
+                    for self.props.entries.iter().enumerate().map(|(idx, entry)| {
                         html! {
                             <ybc::PanelBlock
                                 tag="a"
                                 onclick=self.link.callback(move |_| Messages::SelectEntry(idx))
                                 active=Some(idx) == self.props.selected_idx
                             >
-                                {&identity.id}
+                                <span class="panel-icon"><i class="bi bi-caret-down-fill" aria-hidden="true"></i></span>
+                                {&entry.id}
                             </ybc::PanelBlock>
                         }
                     })
