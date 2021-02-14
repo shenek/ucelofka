@@ -1,39 +1,11 @@
-use anyhow::Result;
-use serde::{Deserialize, Serialize};
-use std::{convert::TryFrom, fmt};
+pub mod v1;
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
-pub struct Customer {
-    pub id: String,
-    pub name: String,
-    pub address: Vec<String>,
-    pub identification: String,
-    pub email: Vec<String>,
-}
+use std::convert::TryFrom;
 
-impl fmt::Display for Customer {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", serde_yaml::to_string(self).unwrap())?;
-        Ok(())
-    }
-}
+use super::data_versions;
+pub use latest::{Customer, Customers};
+pub use v1 as latest;
 
-#[derive(Debug, Default, Deserialize, Serialize, Clone, PartialEq)]
-pub struct Customers {
-    pub customers: Vec<Customer>,
-}
+pub const CURRENT_VERSION: u32 = v1::VERSION;
 
-impl fmt::Display for Customers {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", serde_yaml::to_string(self).unwrap())?;
-        Ok(())
-    }
-}
-
-impl TryFrom<String> for Customer {
-    type Error = serde_yaml::Error;
-
-    fn try_from(input: String) -> Result<Self, Self::Error> {
-        Ok(serde_yaml::from_str(&input)?)
-    }
-}
+data_versions!(Customer, 1);

@@ -2535,6 +2535,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "paste"
+version = "1.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c5d65c4d95931acda4498f675e332fcbdc9a06705cd07086c510e9b6009cd1c1"
+
+[[package]]
 name = "percent-encoding"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3931,6 +3937,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "chrono",
+ "paste",
  "serde",
  "serde_yaml",
 ]

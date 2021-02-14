@@ -13,5 +13,6 @@ categories = ["data-structures"]
 [dependencies]
 anyhow = "~1.0.26"
 chrono = "~0.4.10"
+paste = "1.0"
 serde = { version = "~1.0.104", features = ["derive"]}
 serde_yaml = "~0.8.11"

@@ -1,57 +1,11 @@
-use anyhow::Result;
-use serde::{Deserialize, Serialize};
-use std::{convert::TryFrom, fmt};
+pub mod v1;
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
-pub struct Entry {
-    pub id: String,
-    pub name: String,
-    pub price: f32,
-    pub currency: String,
-    pub details: Vec<String>,
-}
+use std::convert::TryFrom;
 
-impl Entry {
-    pub fn new(
-        id: String,
-        name: String,
-        price: f32,
-        currency: String,
-        details: Vec<String>,
-    ) -> Self {
-        Self {
-            id,
-            name,
-            price,
-            currency,
-            details,
-        }
-    }
-}
+use super::data_versions;
+pub use latest::{Entries, Entry};
+pub use v1 as latest;
 
-impl fmt::Display for Entry {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", serde_yaml::to_string(self).unwrap())?;
-        Ok(())
-    }
-}
+pub const CURRENT_VERSION: u32 = v1::VERSION;
 
-#[derive(Debug, Default, Deserialize, Serialize, Clone, PartialEq)]
-pub struct Entries {
-    pub entries: Vec<Entry>,
-}
-
-impl fmt::Display for Entries {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", serde_yaml::to_string(self).unwrap())?;
-        Ok(())
-    }
-}
-
-impl TryFrom<String> for Entry {
-    type Error = serde_yaml::Error;
-
-    fn try_from(input: String) -> Result<Self, Self::Error> {
-        Ok(serde_yaml::from_str(&input)?)
-    }
-}
+data_versions!(Entry, 1);

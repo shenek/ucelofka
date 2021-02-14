@@ -5,6 +5,7 @@ pub use ucelofka_data::{
     identity::{Identities, Identity},
     invoice::{Invoice, Invoices},
     template::{Template, Templates},
+    Versioned,
 };
 
 use anyhow::{anyhow, Result};
@@ -37,6 +38,7 @@ pub trait Records<ITEM>: Serialize + Debug
 where
     ITEM: TryFrom<String> + Clone + Record,
     <ITEM as TryFrom<String>>::Error: std::fmt::Debug,
+    ITEM: Versioned,
 {
     fn new(records: Vec<ITEM>) -> Self;
     fn load(dir: &Path) -> Result<Self>
@@ -78,7 +80,7 @@ where
                 .ok_or_else(|| anyhow!("Invalid path {}", path.to_string_lossy()))?
                 .to_string();
             let data = std::fs::read_to_string(path)?;
-            let parsed = ITEM::try_from(data)
+            let parsed = ITEM::latest(&data)
                 .map_err(|err| anyhow!("failed to convert {} - {:?}", path_str, err))?;
             res.push(parsed);
         }
