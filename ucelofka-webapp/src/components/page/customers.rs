@@ -95,7 +95,19 @@ impl Component for Customers {
                                             })
 
                                         }
-                                        <dt><span class="has-text-weight-bold">{"Identification:"}</span></dt><dd>{&self.props.customers[idx].identification}</dd>
+                                        <dt><span class="has-text-weight-bold">{"Identification:"}</span></dt>
+                                        <dd>
+                                            <dl>
+                                            {
+                                                for self.props.customers[idx].identifications.iter().map(|identification| html!{
+                                                    <>
+                                                        <dt><span class="has-text-weight-bold">{format!("{}:", &identification.name)}</span></dt>
+                                                        <dd>{&identification.value}</dd>
+                                                    </>
+                                                })
+                                            }
+                                            </dl>
+                                        </dd>
                                     </dl>
                                     </ybc::Content>
                                 </ybc::CardContent>

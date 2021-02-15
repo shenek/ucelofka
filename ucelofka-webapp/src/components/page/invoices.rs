@@ -123,10 +123,14 @@ impl Component for Invoices {
                                                 <dt><span class="has-text-weight-bold">{"Identification:"}</span></dt>
                                                 <dd>
                                                     <dl>
-                                                        <dt><span class="has-text-weight-bold">{"Tax:"}</span></dt>
-                                                        <dd>{&invoice.issuer.identification.tax}</dd>
-                                                        <dt><span class="has-text-weight-bold">{"Registration:"}</span></dt>
-                                                        <dd>{&invoice.issuer.identification.registration}</dd>
+                                                    {
+                                                        for invoice.issuer.identifications.iter().map(|identification| html!{
+                                                            <>
+                                                                <dt><span class="has-text-weight-bold">{format!("{}:", &identification.name)}</span></dt>
+                                                                <dd>{&identification.value}</dd>
+                                                            </>
+                                                        })
+                                                    }
                                                     </dl>
                                                 </dd>
                                             </dl>
@@ -148,7 +152,19 @@ impl Component for Invoices {
                                                         <dd><a href={format!("mailto:{}", &email)}>{email}</a></dd>
                                                     })
                                                 }
-                                                <dt><span class="has-text-weight-bold">{"Identification:"}</span></dt><dd>{&invoice.customer.identification}</dd>
+                                                <dt><span class="has-text-weight-bold">{"Identification:"}</span></dt>
+                                                <dd>
+                                                    <dl>
+                                                    {
+                                                        for invoice.customer.identifications.iter().map(|identification| html!{
+                                                            <>
+                                                                <dt><span class="has-text-weight-bold">{format!("{}:", &identification.name)}</span></dt>
+                                                                <dd>{&identification.value}</dd>
+                                                            </>
+                                                        })
+                                                    }
+                                                    </dl>
+                                                </dd>
                                             </dl>
                                         </dd>
 

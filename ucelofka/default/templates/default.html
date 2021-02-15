@@ -212,11 +212,11 @@
                         {% endif %}
                         <tr>
                             <td>ID</td>
-                            <td>{{ issuer.identification.registration }}</td>
+                            <td>{{ issuer.identifications.0.value }}</td>
                         </tr>
                         <tr>
                             <td>Vat ID</td>
-                            <td>{{ issuer.identification.tax }}</td>
+                            <td>{{ issuer.identifications.1.value }}</td>
                         </tr>
                     </table>
                 </td>
@@ -251,7 +251,7 @@
                         {% endif %}
                         <tr>
                             <td>ID</td>
-                            <td>{{ customer.identification }}</td>
+                            <td>{{ customer.identifications.0.value }}</td>
                         </tr>
                     </table>
                 </td>

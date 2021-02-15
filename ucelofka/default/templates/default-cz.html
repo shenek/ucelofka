@@ -212,7 +212,7 @@
                         {% endif %}
                         <tr>
                             <td>IČ / DIČ</td>
-                            <td>{{ issuer.identification.registration }} / {{ issuer.identification.tax }}</td>
+                            <td>{{ issuer.identifications.0.value }} / {{ issuer.identifications.1.value }}</td>
                         </tr>
                     </table>
                 </td>
@@ -247,7 +247,7 @@
                         {% endif %}
                         <tr>
                             <td>IČ / DIČ</td>
-                            <td>{{ customer.identification }}</td>
+                            <td>{{ customer.identifications.0.value }} / {{ customer.identifications.1.value }}</td>
                         </tr>
                     </table>
                 </td>

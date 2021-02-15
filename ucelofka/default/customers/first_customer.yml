@@ -1,4 +1,5 @@
 ---
+_version: 2
 id: first_customer  # primary key
 name: First Customer  # offical customer name
 address:  # address which is supposed to appear on the invoices
@@ -7,4 +8,8 @@ address:  # address which is supposed to appear on the invoices
   - CoCountry
 email:
   - me@customer.com
-identification: 123456  # Some kind of company ID
+identifications:
+  - name: registration
+    value: 123456
+  - name: tax
+    value: CZ123456

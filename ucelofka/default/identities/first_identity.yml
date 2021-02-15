@@ -1,4 +1,5 @@
 ---
+_version: 2
 id: first_identity  # primary key
 name: Your Name  # your actuall name which will appear in the invoice
 address:  # address which will appear in the invoice
@@ -11,6 +12,8 @@ email:
  - your@email.com
 www:
  - www.your-site.com
-identification:
- tax: 1234567890  # tax id
- registration: 987654321  # registration id
+identifications:
+ - name: tax
+   value: CZ1234567890 
+ - name: registration
+   value: 987654321

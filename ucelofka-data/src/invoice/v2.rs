@@ -5,41 +5,40 @@ use serde::{Deserialize, Serialize};
 
 use crate::{account, customer, data_display, data_try_from, default_version, entry, identity};
 
-pub const VERSION: u32 = 1;
+pub const VERSION: u32 = 2;
 
-pub(crate) const DEFAULT_DUE: i64 = 15; // in days
-
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
-pub struct Billing {
-    pub account_name: String,
-    pub account_number: String,
-    pub BIC: String,
-    pub IBAN: String,
-    pub total: f32,
-    pub currency: String,
-    pub variable_symbol: String,
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
-pub struct Entry {
-    pub name: String,
-    pub price: f32,
-    pub currency: String,
-    pub details: Vec<String>,
-}
+use super::v1::{self, DEFAULT_DUE};
+pub use super::v1::{Billing, Entry};
+pub use crate::identification::v1::Identification;
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct Customer {
     pub name: String,
     pub address: Vec<String>,
-    pub identification: String,
+    pub identifications: Vec<Identification>,
     pub email: Vec<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
-pub struct Identification {
-    pub tax: String,
-    pub registration: String,
+impl From<v1::Customer> for Customer {
+    fn from(old: v1::Customer) -> Self {
+        let identifications = old
+            .identification
+            .splitn(2, '/')
+            .map(|e| e.trim())
+            .zip(["registration", "tax"].iter())
+            .map(|(value, name)| Identification {
+                name: name.to_string(),
+                value: value.to_string(),
+            })
+            .collect();
+
+        Self {
+            name: old.name,
+            address: old.address,
+            email: old.email,
+            identifications,
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
@@ -49,7 +48,30 @@ pub struct Issuer {
     pub phone: Vec<String>,
     pub email: Vec<String>,
     pub www: Vec<String>,
-    pub identification: Identification,
+    pub identifications: Vec<Identification>,
+}
+
+impl From<v1::Issuer> for Issuer {
+    fn from(old: v1::Issuer) -> Self {
+        let identifications = vec![
+            Identification {
+                name: "registration".into(),
+                value: old.identification.registration,
+            },
+            Identification {
+                name: "tax".into(),
+                value: old.identification.tax,
+            },
+        ];
+        Self {
+            name: old.name,
+            address: old.address,
+            phone: old.phone,
+            email: old.email,
+            www: old.www,
+            identifications,
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
@@ -75,9 +97,9 @@ impl Invoice {
     }
 
     pub fn new(
-        identity: identity::v1::Identity,
+        identity: identity::Identity,
         account: account::Account,
-        customer: customer::v1::Customer,
+        customer: customer::Customer,
         entries: &[entry::Entry],
         invoices: Vec<Self>,
     ) -> Self {
@@ -96,15 +118,12 @@ impl Invoice {
                 email: identity.email,
                 phone: identity.phone,
                 www: identity.www,
-                identification: Identification {
-                    tax: identity.identification.tax,
-                    registration: identity.identification.registration,
-                },
+                identifications: identity.identifications,
             },
             customer: Customer {
                 name: customer.name,
                 address: customer.address,
-                identification: customer.identification,
+                identifications: customer.identifications,
                 email: customer.email,
             },
             billing: Billing {
@@ -125,6 +144,21 @@ impl Invoice {
                     details: e.details.clone(),
                 })
                 .collect(),
+        }
+    }
+}
+
+impl From<v1::Invoice> for Invoice {
+    fn from(old: v1::Invoice) -> Self {
+        Self {
+            _version: VERSION,
+            id: old.id,
+            issue_day: old.issue_day,
+            due_day: old.due_day,
+            entries: old.entries,
+            billing: old.billing,
+            issuer: old.issuer.into(),
+            customer: old.customer.into(),
         }
     }
 }

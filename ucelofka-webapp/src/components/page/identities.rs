@@ -107,10 +107,14 @@ impl Component for Identities {
                                         <dt><span class="has-text-weight-bold">{"Identitfication:"}</span></dt>
                                         <dd>
                                             <dl>
-                                                <dt><span class="has-text-weight-bold">{"Tax:"}</span></dt>
-                                                <dd>{&self.props.identities[idx].identification.tax}</dd>
-                                                <dt><span class="has-text-weight-bold">{"Registration:"}</span></dt>
-                                                <dd>{&self.props.identities[idx].identification.registration}</dd>
+                                            {
+                                                for self.props.identities[idx].identifications.iter().map(|identification| html!{
+                                                    <>
+                                                        <dt><span class="has-text-weight-bold">{format!("{}:", &identification.name)}</span></dt>
+                                                        <dd>{&identification.value}</dd>
+                                                    </>
+                                                })
+                                            }
                                             </dl>
                                         </dd>
                                     </dl>
