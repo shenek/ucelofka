@@ -16,24 +16,25 @@ include = ["default", "resources", "src"]
 actix-web = "3.3"
 actix-files = "0.5"
 anyhow = "~1.0.26"
-clap = "~2.33.0"
-fluent = "~0.13.1"
-fluent-bundle = "~0.13.1"
+clap = "3.0.0-beta.2"
+fluent = "~0.15.0"
+fluent-bundle = "~0.15.0"
 fluent-langneg = "~0.13.0"
 git2 = "~0.13.6"
 lazy_static = "~1.4.0"
 include_dir = { version = "~0.6.0" }
+intl-memoizer = "~0.5.1"
 serde = { version = "~1.0.104", features = ["derive"]}
 serde_yaml = "~0.8.11"
-tera = "~1.5.0"
+tera = "~1.6.1"
 tokio = { version = "1", features = ["rt", "rt-multi-thread"]}
 unic-langid = { version = "~0.9.0", features = ["macros"]}
 ucelofka-data = { path="../ucelofka-data/" }
 
 [dev-dependencies]
 assert_cmd = "~1.0.1"
-tempfile = "~3.1.0"
-test-case = "~1.0.0"
+tempfile = "~3.2.0"
+test-case = "~1.1.0"
 
 [build-dependencies]
 trunk = "0.8"

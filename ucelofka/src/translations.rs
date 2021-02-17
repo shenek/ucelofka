@@ -1,7 +1,8 @@
 use anyhow::{anyhow, Result};
-use fluent_bundle::{concurrent::FluentBundle, FluentArgs, FluentResource};
+use fluent_bundle::{bundle::FluentBundle, FluentArgs, FluentResource};
 use fluent_langneg::{negotiate_languages, NegotiationStrategy};
 use include_dir::{include_dir, Dir, DirEntry};
+use intl_memoizer::concurrent::IntlLangMemoizer;
 use lazy_static::lazy_static;
 use std::{
     env,
@@ -49,7 +50,7 @@ fn detect_language() -> Result<LanguageIdentifier> {
     Ok(lang)
 }
 
-fn get_bundle() -> Result<FluentBundle<FluentResource>> {
+fn get_bundle() -> Result<FluentBundle<FluentResource, IntlLangMemoizer>> {
     let available = get_available_locales()?;
     let mut requested = vec![DEFAULT_LANG];
 
@@ -67,7 +68,7 @@ fn get_bundle() -> Result<FluentBundle<FluentResource>> {
     .map(Clone::clone)
     .collect::<Vec<LanguageIdentifier>>();
 
-    let mut bundle = FluentBundle::new(&resolved);
+    let mut bundle = FluentBundle::new_concurrent(resolved.clone());
     for lang in resolved {
         let data = read_language_data(&lang)?;
         let resource = FluentResource::try_new(data)
@@ -84,7 +85,7 @@ pub fn get_message(msgid: &str, args: Option<FluentArgs>) -> String {
         .get_message(msgid)
         .unwrap_or_else(|| panic!("Message `{}` was not found.", msgid));
     let pattern = msg
-        .value
+        .value()
         .unwrap_or_else(|| panic!("Message `{}` has no value.", msgid));
     BUNDLE
         .format_pattern(pattern, args.as_ref(), &mut errors)
@@ -92,7 +93,7 @@ pub fn get_message(msgid: &str, args: Option<FluentArgs>) -> String {
 }
 
 lazy_static! {
-    static ref BUNDLE: FluentBundle<FluentResource> = {
+    static ref BUNDLE: FluentBundle<FluentResource, IntlLangMemoizer> = {
         match get_bundle() {
             Err(err) => panic!(format!("failed to load translations: {}", err)),
             Ok(bundle) => bundle,
