@@ -2,14 +2,15 @@
 
 use chrono::{Datelike, Duration, Utc};
 use serde::{Deserialize, Serialize};
+use std::convert::TryFrom;
 
 use crate::{account, customer, data_display, data_try_from, default_version, entry, identity};
-
-pub const VERSION: u32 = 2;
 
 use super::v1::{self, DEFAULT_DUE};
 pub use super::v1::{Billing, Entry};
 pub use crate::identification::v1::Identification;
+
+pub const VERSION: u32 = 2;
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct Customer {
@@ -102,6 +103,7 @@ impl Invoice {
         customer: customer::Customer,
         entries: &[entry::Entry],
         invoices: Vec<Self>,
+        due: Option<usize>,
     ) -> Self {
         let total = entries.iter().map(|e| e.price).sum();
         let new_id = Self::make_new_id(&invoices);
@@ -109,9 +111,13 @@ impl Invoice {
             _version: VERSION,
             id: new_id,
             issue_date: Utc::today().format("%Y-%m-%d").to_string(),
-            due_date: (Utc::now() + Duration::days(DEFAULT_DUE))
-                .format("%Y-%m-%d")
-                .to_string(),
+            due_date: (Utc::now()
+                + Duration::days(
+                    due.map(|v| i64::try_from(v).unwrap())
+                        .unwrap_or(DEFAULT_DUE),
+                ))
+            .format("%Y-%m-%d")
+            .to_string(),
             issuer: Issuer {
                 name: identity.name,
                 address: identity.address,

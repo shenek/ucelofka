@@ -131,6 +131,17 @@ fn prepare_invoice_subcommand() -> App<'static, 'static> {
                         .long("git")
                         .takes_value(false)
                         .required(false),
+                )
+                .arg(
+                    Arg::with_name("due")
+                        .help("Due time (in days)")
+                        .short("D")
+                        .long("due")
+                        .takes_value(true)
+                        .required(false)
+                        .validator(|v: String| {
+                            v.parse::<usize>().map(|_| ()).map_err(|e| e.to_string())
+                        }),
                 ),
         )
         .subcommand(SubCommand::with_name("list").about("Lists invoices"))
@@ -327,6 +338,11 @@ fn process_invoice(app: App, matches: &ArgMatches<'static>) -> Result<()> {
     let data_path = get_data_dir(matches);
     match matches.subcommand() {
         ("create", Some(create_matches)) => {
+            let due: Option<usize> = match create_matches.value_of("due") {
+                Some(due_str) => Some(due_str.parse().unwrap()),
+                None => None,
+            };
+
             let new_id = invoice::create(
                 &data_path,
                 create_matches.value_of("customer").unwrap(),
@@ -334,6 +350,7 @@ fn process_invoice(app: App, matches: &ArgMatches<'static>) -> Result<()> {
                 create_matches.value_of("account").unwrap(),
                 create_matches.values_of("entry").unwrap().collect(),
                 create_matches.is_present("git"),
+                due,
             )?;
             println!("Created invoice {}", new_id);
         }

@@ -36,6 +36,7 @@ pub fn create(
     account: &str,
     entries: Vec<&str>,
     git: bool,
+    due: Option<usize>,
 ) -> Result<String> {
     let account = actions::account::get(data_path, account)?;
     let customer = actions::customer::get(data_path, customer)?;
@@ -64,6 +65,7 @@ pub fn create(
         customer,
         &entries_vec,
         invoices?.invoices,
+        due,
     );
 
     let invoice_path = data_path.join(Path::new("invoices"));
