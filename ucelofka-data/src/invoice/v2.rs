@@ -79,8 +79,8 @@ pub struct Invoice {
     #[serde(default = "default_version")]
     pub _version: u32,
     pub id: u64,
-    pub issue_day: String,
-    pub due_day: String,
+    pub issue_date: String,
+    pub due_date: String,
     pub issuer: Issuer,
     pub customer: Customer,
     pub entries: Vec<Entry>,
@@ -108,8 +108,8 @@ impl Invoice {
         Self {
             _version: VERSION,
             id: new_id,
-            issue_day: Utc::today().format("%Y-%m-%d").to_string(),
-            due_day: (Utc::now() + Duration::days(DEFAULT_DUE))
+            issue_date: Utc::today().format("%Y-%m-%d").to_string(),
+            due_date: (Utc::now() + Duration::days(DEFAULT_DUE))
                 .format("%Y-%m-%d")
                 .to_string(),
             issuer: Issuer {
@@ -153,8 +153,8 @@ impl From<v1::Invoice> for Invoice {
         Self {
             _version: VERSION,
             id: old.id,
-            issue_day: old.issue_day,
-            due_day: old.due_day,
+            issue_date: old.issue_day,
+            due_date: old.due_day,
             entries: old.entries,
             billing: old.billing,
             issuer: old.issuer.into(),

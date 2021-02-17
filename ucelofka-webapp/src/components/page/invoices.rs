@@ -90,8 +90,8 @@ impl Component for Invoices {
                                 <ybc::CardContent>
                                     <ybc::Content>
                                     <dl>
-                                        <dt><span class="has-text-weight-bold">{"Issue date:"}</span></dt><dd>{&invoice.issue_day}</dd>
-                                        <dt><span class="has-text-weight-bold">{"Due date:"}</span></dt><dd>{&invoice.due_day}</dd>
+                                        <dt><span class="has-text-weight-bold">{"Issue date:"}</span></dt><dd>{&invoice.issue_date}</dd>
+                                        <dt><span class="has-text-weight-bold">{"Due date:"}</span></dt><dd>{&invoice.due_date}</dd>
                                         <dt><span class="has-text-weight-bold">{"Issuer:"}</span></dt>
                                         <dd>
                                             <dl>
