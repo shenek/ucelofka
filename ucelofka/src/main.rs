@@ -7,6 +7,8 @@ use anyhow::{anyhow, Result};
 use clap::{
     crate_authors, crate_description, crate_name, crate_version, App, Arg, ArgMatches, Values,
 };
+use clap_generate::generators::{Bash, Elvish, Fish, PowerShell, Zsh};
+use clap_generate::{generate, Generator};
 use fluent::fluent_args;
 use std::io;
 use std::path::{Path, PathBuf};
@@ -308,6 +310,17 @@ fn prepare_web() -> App<'static> {
         .about("start webserver frontend for ucelofka")
 }
 
+fn prepare_completions() -> App<'static> {
+    App::new("completions").about("completions generator").arg(
+        Arg::new("shell")
+            .short('s')
+            .long("shell")
+            .about("For which shell the completion is supposed to be generated")
+            .possible_values(&["bash", "fish", "elvish", "powershell", "zsh"])
+            .required(true),
+    )
+}
+
 fn prepare_app() -> App<'static> {
     App::new(crate_name!())
         .author(crate_authors!())
@@ -320,6 +333,7 @@ fn prepare_app() -> App<'static> {
         .subcommand(prepare_entry_subcommand())
         .subcommand(prepare_identity_subcommand())
         .subcommand(prepare_web())
+        .subcommand(prepare_completions())
 }
 
 fn get_data_dir(matches: &ArgMatches) -> PathBuf {
@@ -501,6 +515,37 @@ fn process_web(_app: App, matches: &ArgMatches) -> Result<()> {
     Ok(())
 }
 
+fn print_completions<G: Generator>(app: &mut App) {
+    generate::<G, _>(app, app.get_name().to_string(), &mut io::stdout());
+}
+
+fn process_completions(mut app: App, matches: &ArgMatches) -> Result<()> {
+    let shell = matches.value_of("shell").unwrap();
+    match shell {
+        "bash" => {
+            print_completions::<Bash>(&mut app);
+            Ok(())
+        }
+        "elvish" => {
+            print_completions::<Elvish>(&mut app);
+            Ok(())
+        }
+        "fish" => {
+            print_completions::<Fish>(&mut app);
+            Ok(())
+        }
+        "powershell" => {
+            print_completions::<PowerShell>(&mut app);
+            Ok(())
+        }
+        "zsh" => {
+            print_completions::<Zsh>(&mut app);
+            Ok(())
+        }
+        _ => unreachable!(),
+    }
+}
+
 fn main() -> Result<()> {
     let app = prepare_app();
 
@@ -514,6 +559,9 @@ fn main() -> Result<()> {
         Some(("entry", entry_matches)) => process_entry(app.clone(), entry_matches)?,
         Some(("identity", identity_matches)) => process_identity(app.clone(), identity_matches)?,
         Some(("web", web_matches)) => process_web(app.clone(), web_matches)?,
+        Some(("completions", completions_matches)) => {
+            process_completions(app.clone(), completions_matches)?
+        }
         _ => exit_on_parse_error(app),
     }
     Ok(())
