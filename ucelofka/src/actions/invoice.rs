@@ -128,7 +128,7 @@ pub fn render(data_path: &Path, invoice: &str, template: &str, git: bool) -> Res
     let templates = Templates::load(&templates_path)?;
 
     let template_instance = templates
-        .get(template)
+        .get(template)?
         .ok_or_else(|| anyhow!("failed to find template {}", template))?;
 
     // Render

@@ -10,6 +10,6 @@ pub fn list(data_path: &Path) -> Result<Templates> {
 
 pub fn get(data_path: &Path, id: &str) -> Result<Template> {
     list(data_path)?
-        .get(id)
+        .get(id)?
         .ok_or_else(|| anyhow!("Template {} not found.", id))
 }

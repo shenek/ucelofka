@@ -1,21 +1,28 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
+use html2text::{from_read_with_decorator, render::text_renderer::RichDecorator};
 use serde::{Deserialize, Serialize};
 use std::{
     fmt,
+    fs::File,
     path::{Path, PathBuf},
 };
 
 pub const VERSION: u32 = 1;
+pub const TEXT_WIDTH: usize = 80;
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct Template {
     pub name: String,
     pub path: PathBuf,
+    pub text: Option<String>,
 }
 
 impl<'a> fmt::Display for Template {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} ({})", self.name, self.path.to_str().unwrap())?;
+        if let Some(text) = &self.text {
+            write!(f, "\n{}", text)?;
+        }
         Ok(())
     }
 }
@@ -25,7 +32,21 @@ impl Template {
         Self {
             name: path.file_name().unwrap().to_str().unwrap().to_string(),
             path,
+            text: None,
         }
+    }
+
+    fn fill_text(&mut self) -> Result<()> {
+        let file = File::open(&self.path)
+            .map_err(|e| anyhow!("Failed to open file {}: {}", self.path.to_str().unwrap(), e))?;
+
+        self.text = Some(from_read_with_decorator(
+            file,
+            TEXT_WIDTH,
+            RichDecorator::new(),
+        ));
+
+        Ok(())
     }
 }
 
@@ -54,13 +75,15 @@ impl Templates {
         Ok(Self { templates })
     }
 
-    pub fn get(&self, name: &str) -> Option<Template> {
+    pub fn get(&self, name: &str) -> Result<Option<Template>> {
         for template in &self.templates {
             if template.name == name {
-                return Some(template.clone());
+                let mut cloned = template.clone();
+                cloned.fill_text()?;
+                return Ok(Some(cloned));
             }
         }
-        None
+        Ok(None)
     }
 }
 

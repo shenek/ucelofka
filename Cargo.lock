@@ -1885,6 +1885,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "html2text"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a26379dcb715e237b96102a12b505c553e2bffa74bae2e54658748d298660ef1"
+dependencies = [
+ "html5ever",
+ "markup5ever_rcdom",
+ "unicode-width",
+]
+
+[[package]]
 name = "html5ever"
 version = "0.25.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2310,6 +2321,18 @@ dependencies = [
  "string_cache",
  "string_cache_codegen",
  "tendril",
+]
+
+[[package]]
+name = "markup5ever_rcdom"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f015da43bcd8d4f144559a3423f4591d69b8ce0652c905374da7205df336ae2b"
+dependencies = [
+ "html5ever",
+ "markup5ever",
+ "tendril",
+ "xml5ever",
 ]
 
 [[package]]
@@ -4092,6 +4115,7 @@ dependencies = [
  "fluent-bundle",
  "fluent-langneg",
  "git2",
+ "html2text",
  "include_dir",
  "intl-memoizer",
  "lazy_static",
@@ -4112,6 +4136,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "chrono",
+ "html2text",
  "paste",
  "serde",
  "serde_yaml",
@@ -4547,6 +4572,18 @@ checksum = "d59cefebd0c892fa2dd6de581e937301d8552cb44489cdff035c6187cb63fa5e"
 dependencies = [
  "winapi 0.2.8",
  "winapi-build",
+]
+
+[[package]]
+name = "xml5ever"
+version = "0.16.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0b1b52e6e8614d4a58b8e70cf51ec0cc21b256ad8206708bcff8139b5bbd6a59"
+dependencies = [
+ "log",
+ "mac",
+ "markup5ever",
+ "time 0.1.43",
 ]
 
 [[package]]

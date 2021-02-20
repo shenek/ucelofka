@@ -15,7 +15,7 @@ use std::path::{Path, PathBuf};
 use ucelofka_data as data;
 
 use crate::{
-    actions::{account, customer, entry, identity, invoice, project},
+    actions::{account, customer, entry, identity, invoice, project, template},
     translations::{get_message, texts},
 };
 
@@ -321,6 +321,14 @@ fn prepare_completions() -> App<'static> {
     )
 }
 
+fn prepare_template_subcommand() -> App<'static> {
+    App::new("template")
+        .arg(prepare_data_dir())
+        .about("Template management")
+        .subcommand(App::new("list").about("Lists templates"))
+        .subcommand(prepare_get_subcommand("Get template"))
+}
+
 fn prepare_app() -> App<'static> {
     App::new(crate_name!())
         .author(crate_authors!())
@@ -332,6 +340,7 @@ fn prepare_app() -> App<'static> {
         .subcommand(prepare_customer_subcommand())
         .subcommand(prepare_entry_subcommand())
         .subcommand(prepare_identity_subcommand())
+        .subcommand(prepare_template_subcommand())
         .subcommand(prepare_web())
         .subcommand(prepare_completions())
 }
@@ -502,6 +511,22 @@ fn process_identity(app: App, matches: &ArgMatches) -> Result<()> {
     Ok(())
 }
 
+fn process_template(app: App, matches: &ArgMatches) -> Result<()> {
+    let data_path = get_data_dir(matches);
+    match matches.subcommand() {
+        Some(("list", _)) => {
+            println!("{}", template::list(&data_path)?);
+        }
+        Some(("get", get_matches)) => {
+            let template_id = get_matches.value_of("id").unwrap();
+            let template = template::get(&data_path, template_id)?;
+            println!("{}", template);
+        }
+        _ => exit_on_parse_error(app),
+    }
+    Ok(())
+}
+
 fn process_web(_app: App, matches: &ArgMatches) -> Result<()> {
     let data_path = get_data_dir(matches);
     let port_str = matches.value_of("port").unwrap();
@@ -558,6 +583,7 @@ fn main() -> Result<()> {
         Some(("customer", customer_matches)) => process_customer(app.clone(), customer_matches)?,
         Some(("entry", entry_matches)) => process_entry(app.clone(), entry_matches)?,
         Some(("identity", identity_matches)) => process_identity(app.clone(), identity_matches)?,
+        Some(("template", identity_matches)) => process_template(app.clone(), identity_matches)?,
         Some(("web", web_matches)) => process_web(app.clone(), web_matches)?,
         Some(("completions", completions_matches)) => {
             process_completions(app.clone(), completions_matches)?
