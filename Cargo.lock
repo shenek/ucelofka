@@ -4115,7 +4115,6 @@ dependencies = [
  "fluent-bundle",
  "fluent-langneg",
  "git2",
- "html2text",
  "include_dir",
  "intl-memoizer",
  "lazy_static",

@@ -15,7 +15,7 @@ use std::path::{Path, PathBuf};
 use ucelofka_data as data;
 
 use crate::{
-    actions::{account, customer, entry, identity, invoice, project, template},
+    actions::{account, customer, entry, identity, ids, invoice, project, template},
     translations::{get_message, texts},
 };
 
@@ -329,6 +329,12 @@ fn prepare_template_subcommand() -> App<'static> {
         .subcommand(prepare_get_subcommand("Get template"))
 }
 
+fn prepare_ids_subcommand() -> App<'static> {
+    App::new("ids")
+        .arg(prepare_data_dir())
+        .about("Print ids of all entities")
+}
+
 fn prepare_app() -> App<'static> {
     App::new(crate_name!())
         .author(crate_authors!())
@@ -343,6 +349,7 @@ fn prepare_app() -> App<'static> {
         .subcommand(prepare_template_subcommand())
         .subcommand(prepare_web())
         .subcommand(prepare_completions())
+        .subcommand(prepare_ids_subcommand())
 }
 
 fn get_data_dir(matches: &ArgMatches) -> PathBuf {
@@ -571,6 +578,12 @@ fn process_completions(mut app: App, matches: &ArgMatches) -> Result<()> {
     }
 }
 
+fn process_ids(_app: App, matches: &ArgMatches) -> Result<()> {
+    let data_path = get_data_dir(matches);
+    println!("{}", ids::ids(&data_path)?);
+    Ok(())
+}
+
 fn main() -> Result<()> {
     let app = prepare_app();
 
@@ -588,6 +601,7 @@ fn main() -> Result<()> {
         Some(("completions", completions_matches)) => {
             process_completions(app.clone(), completions_matches)?
         }
+        Some(("ids", ids_matches)) => process_ids(app.clone(), ids_matches)?,
         _ => exit_on_parse_error(app),
     }
     Ok(())
