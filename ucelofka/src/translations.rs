@@ -95,7 +95,7 @@ pub fn get_message(msgid: &str, args: Option<FluentArgs>) -> String {
 lazy_static! {
     static ref BUNDLE: FluentBundle<FluentResource, IntlLangMemoizer> = {
         match get_bundle() {
-            Err(err) => panic!(format!("failed to load translations: {}", err)),
+            Err(err) => panic!("failed to load translations: {}", err),
             Ok(bundle) => bundle,
         }
     };

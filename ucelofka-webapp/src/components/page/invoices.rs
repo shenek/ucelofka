@@ -20,11 +20,7 @@ pub struct Invoices {
 
 impl Invoices {
     fn current_invoice(&self) -> Option<&Invoice> {
-        if let Some(idx) = self.props.selected_idx {
-            Some(&self.props.invoices[idx])
-        } else {
-            None
-        }
+        self.props.selected_idx.map(|idx| &self.props.invoices[idx])
     }
 }
 
