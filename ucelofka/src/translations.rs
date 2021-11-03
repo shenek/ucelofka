@@ -35,7 +35,7 @@ fn get_available_locales() -> Result<Vec<LanguageIdentifier>> {
 fn read_language_data(id: &LanguageIdentifier) -> Result<String> {
     let file = RESOURCES
         .get_file(format!("{}/ucelofka.ftl", id.to_string()))
-        .ok_or_else(|| anyhow!("{} translation not found",))?;
+        .ok_or_else(|| anyhow!("{} translation not found", id))?;
     Ok(from_utf8(file.contents)?.to_string())
 }
 
