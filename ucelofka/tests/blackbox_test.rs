@@ -401,6 +401,7 @@ mod invoice {
             .failure();
 
         let stderr = String::from_utf8(assert.get_output().stderr.clone()).unwrap();
+        println!("{}", stderr);
         assert!(stderr.contains("CZK, USD"));
     }
 
