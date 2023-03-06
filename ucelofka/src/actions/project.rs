@@ -8,7 +8,7 @@ use std::{
 
 static DEFAULTS: Dir = include_dir!("default/");
 
-pub fn make(data_path: &str, git: bool) -> Result<()> {
+pub fn make(data_path: &Path, git: bool) -> Result<()> {
     // create dirs
     create_dir_all(data_path).map_err(|err| anyhow!("failed to create project root {}", err))?;
 
@@ -17,7 +17,7 @@ pub fn make(data_path: &str, git: bool) -> Result<()> {
         if git {
             // initialize a repo
             Some(Repository::init(data_path).map_err(|err| {
-                anyhow!("failed to create git repository in {} ({})", data_path, err)
+                anyhow!("failed to create git repository in {} ({})", data_path.to_string_lossy(), err)
             })?)
         } else {
             None
@@ -44,7 +44,7 @@ pub fn make(data_path: &str, git: bool) -> Result<()> {
                         .map_err(|err| anyhow!("Failed to get repo index ({})", err))?;
                     index
                         .add_path(relative_path)
-                        .map_err(|err| anyhow!("Failed to add a file {} ({})", data_path, err))?;
+                        .map_err(|err| anyhow!("Failed to add a file {} ({})", data_path.to_string_lossy(), err))?;
                     index
                         .write()
                         .map_err(|err| anyhow!("Failed to write to index ({})", err))?;

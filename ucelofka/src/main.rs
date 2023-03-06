@@ -5,10 +5,14 @@ pub mod web;
 
 use anyhow::{anyhow, Result};
 use clap::{
-    crate_authors, crate_description, crate_name, crate_version, App, Arg, ArgMatches, Values,
+    crate_authors, crate_description, crate_name, crate_version, value_parser, Arg, ArgAction,
+    ArgMatches, Command,
 };
-use clap_generate::generators::{Bash, Elvish, Fish, PowerShell, Zsh};
-use clap_generate::{generate, Generator};
+use clap_complete::{
+    generate,
+    shells::{Bash, Elvish, Fish, PowerShell, Zsh},
+    Generator,
+};
 use fluent::fluent_args;
 use std::io;
 use std::path::{Path, PathBuf};
@@ -19,8 +23,9 @@ use crate::{
     translations::{get_message, texts},
 };
 
-pub fn check_data_dir(path_str: &str) -> Result<()> {
-    let root_dir: &Path = Path::new(&path_str);
+pub fn check_data_dir(path: &PathBuf) -> Result<PathBuf> {
+    let root_dir: &Path = path.as_path();
+    let path_str = path.to_string_lossy().to_string();
     if let Ok(path) = root_dir.canonicalize() {
         if !path.is_dir() {
             return Err(anyhow!(get_message(
@@ -48,7 +53,7 @@ pub fn check_data_dir(path_str: &str) -> Result<()> {
                 )));
             }
         }
-        Ok(())
+        Ok(root_dir.to_owned())
     } else {
         Err(anyhow!(get_message(
             "path-not-exits",
@@ -57,286 +62,284 @@ pub fn check_data_dir(path_str: &str) -> Result<()> {
     }
 }
 
-fn prepare_data_dir() -> Arg<'static> {
+fn prepare_data_dir() -> Arg {
     Arg::new("data_dir")
         .short('P')
         .long("path")
         .value_name("DATA_DIR")
-        .takes_value(true)
+        .num_args(1)
         .required(false)
-        .validator(|s| check_data_dir(s).map_err(|e| e.to_string()))
-        .about(&texts::DATA_DIRECTORY_PATH)
+        .value_parser(value_parser!(PathBuf))
+        .help(&texts::DATA_DIRECTORY_PATH.to_string())
         .default_value(".")
 }
 
-fn prepare_get_subcommand(about: &'static str) -> App<'static> {
-    App::new("get")
+fn prepare_get_subcommand(help: &'static str) -> Command {
+    Command::new("get")
         .arg(
             Arg::new("id")
                 .short('I')
                 .long("id")
-                .takes_value(true)
+                .num_args(1)
                 .required(true),
         )
-        .about(about)
+        .about(help)
 }
 
-fn prepare_invoice_subcommand() -> App<'static> {
-    App::new("invoice")
+fn prepare_invoice_subcommand() -> Command {
+    Command::new("invoice")
         .arg(prepare_data_dir())
         .about("Invoice management")
         .subcommand(
-            App::new("create")
+            Command::new("create")
                 .about("Creates a new invoice")
                 .arg(
                     Arg::new("customer")
-                        .about("Customer id")
+                        .help("Customer id")
                         .long("customer")
                         .short('C')
-                        .multiple(false)
-                        .takes_value(true)
+                        .num_args(1)
                         .required(true),
                 )
                 .arg(
                     Arg::new("identity")
-                        .about("Identity id")
+                        .help("Identity id")
                         .short('I')
                         .long("identity")
-                        .multiple(false)
-                        .takes_value(true)
+                        .num_args(1)
                         .required(true),
                 )
                 .arg(
                     Arg::new("account")
-                        .about("Account id")
+                        .help("Account id")
                         .long("account")
                         .short('A')
-                        .multiple(false)
-                        .takes_value(true)
+                        .num_args(1)
                         .required(true),
                 )
                 .arg(
                     Arg::new("entry")
-                        .about("Entry id")
+                        .help("Entry id")
                         .short('E')
                         .long("entry")
-                        .multiple(true)
-                        .takes_value(true)
-                        .required(true),
+                        .num_args(1)
+                        .required(true)
+                        .action(ArgAction::Append),
                 )
                 .arg(
                     Arg::new("git")
                         .env("UCELOFKA_GIT")
-                        .about("Add newly created invoice to git")
+                        .help("Add newly created invoice to git")
                         .short('G')
                         .long("git")
-                        .takes_value(false)
+                        .num_args(0)
                         .required(false),
                 )
                 .arg(
                     Arg::new("due")
-                        .about("Due time (in days)")
+                        .help("Due time (in days)")
                         .short('D')
                         .long("due")
-                        .takes_value(true)
+                        .num_args(1)
                         .required(false)
-                        .validator(|v: &str| {
-                            v.parse::<usize>().map(|_| ()).map_err(|e| e.to_string())
-                        }),
+                        .value_parser(value_parser!(usize)),
                 ),
         )
-        .subcommand(App::new("list").about("Lists invoices"))
-        .subcommand(App::new("ids").about("List invoice ids"))
+        .subcommand(Command::new("list").about("Lists invoices"))
+        .subcommand(Command::new("ids").about("List invoice ids"))
         .subcommand(
-            App::new("render")
+            Command::new("render")
                 .about("Renders invoice")
                 .arg(
                     Arg::new("template")
-                        .about("Template id")
+                        .help("Template id")
                         .short('T')
                         .long("template")
-                        .takes_value(true)
+                        .num_args(1)
                         .required(true),
                 )
                 .arg(
                     Arg::new("invoice")
-                        .about("Invoice id")
+                        .help("Invoice id")
                         .short('I')
                         .long("invoice")
-                        .takes_value(true)
+                        .num_args(1)
                         .required(true),
                 )
                 .arg(
                     Arg::new("git")
                         .env("UCELOFKA_GIT")
-                        .about("Add newly created file to git")
+                        .help("Add newly created file to git")
                         .short('G')
                         .long("git")
-                        .takes_value(false)
+                        .num_args(0)
                         .required(false),
                 ),
         )
         .subcommand(prepare_get_subcommand("Get invoice"))
 }
 
-fn prepare_project_subcommand() -> App<'static> {
-    App::new("project")
+fn prepare_project_subcommand() -> Command {
+    Command::new("project")
         .about("Manages data project")
         .subcommand(
-            App::new("make")
+            Command::new("make")
                 .about("Creates new data dir")
                 .arg(
                     Arg::new("target")
-                        .about("Where is should be placed")
+                        .help("Where is should be placed")
                         .short('T')
                         .long("target")
-                        .takes_value(true)
+                        .value_parser(value_parser!(PathBuf))
+                        .num_args(1)
                         .required(true),
                 )
                 .arg(
                     Arg::new("git")
                         .env("UCELOFKA_GIT")
-                        .about("Initialize with a git repository")
+                        .help("Initialize with a git repository")
                         .short('G')
                         .long("git")
-                        .takes_value(false)
+                        .num_args(0)
                         .required(false),
                 ),
         )
 }
 
-fn prepare_account_subcommand() -> App<'static> {
-    App::new("account")
+fn prepare_account_subcommand() -> Command {
+    Command::new("account")
         .arg(prepare_data_dir())
         .about("Account management")
-        .subcommand(App::new("list").about("Lists accounts"))
-        .subcommand(App::new("ids").about("Lists accounts ids"))
+        .subcommand(Command::new("list").about("Lists accounts"))
+        .subcommand(Command::new("ids").about("Lists accounts ids"))
         .subcommand(prepare_get_subcommand("Get account"))
 }
 
-fn prepare_customer_subcommand() -> App<'static> {
-    App::new("customer")
+fn prepare_customer_subcommand() -> Command {
+    Command::new("customer")
         .arg(prepare_data_dir())
         .about("Customer management")
-        .subcommand(App::new("list").about("Lists customers"))
-        .subcommand(App::new("ids").about("Lists customers ids"))
+        .subcommand(Command::new("list").about("Lists customers"))
+        .subcommand(Command::new("ids").about("Lists customers ids"))
         .subcommand(prepare_get_subcommand("Get customer"))
 }
 
-fn prepare_entry_subcommand() -> App<'static> {
-    App::new("entry")
+fn prepare_entry_subcommand() -> Command {
+    Command::new("entry")
         .arg(prepare_data_dir())
         .about("Entry management")
-        .subcommand(App::new("list").about("Lists entries"))
-        .subcommand(App::new("ids").about("Lists entries ids"))
+        .subcommand(Command::new("list").about("Lists entries"))
+        .subcommand(Command::new("ids").about("Lists entries ids"))
         .subcommand(prepare_get_subcommand("Get entry"))
         .subcommand(
-            App::new("create")
+            Command::new("create")
                 .about("Create an entry")
                 .arg(
                     Arg::new("id")
-                        .about("New entry ID")
+                        .help("New entry ID")
                         .short('I')
                         .long("id")
-                        .takes_value(true)
+                        .num_args(1)
                         .required(true),
                 )
                 .arg(
                     Arg::new("name")
-                        .about("New entry name")
+                        .help("New entry name")
                         .short('N')
                         .long("name")
-                        .takes_value(true)
+                        .num_args(1)
                         .required(true),
                 )
                 .arg(
                     Arg::new("price")
-                        .about("New entry price")
+                        .help("New entry price")
                         .short('P')
                         .long("price")
-                        .takes_value(true)
+                        .num_args(1)
                         .required(true),
                 )
                 .arg(
                     Arg::new("currency")
-                        .about("New entry currency")
+                        .help("New entry currency")
                         .short('C')
                         .long("currency")
-                        .takes_value(true)
+                        .num_args(1)
                         .required(true),
                 )
                 .arg(
                     Arg::new("details")
-                        .about("New entry detail")
+                        .help("New entry detail")
                         .short('D')
                         .long("detail")
-                        .takes_value(true)
-                        .multiple(true)
+                        .num_args(1..)
                         .required(false),
                 )
                 .arg(
                     Arg::new("git")
                         .env("UCELOFKA_GIT")
-                        .about("Add newly created entry to git")
+                        .help("Add newly created entry to git")
                         .short('G')
                         .long("git")
-                        .takes_value(false)
+                        .num_args(0)
                         .required(false),
                 ),
         )
 }
 
-fn prepare_identity_subcommand() -> App<'static> {
-    App::new("identity")
+fn prepare_identity_subcommand() -> Command {
+    Command::new("identity")
         .arg(prepare_data_dir())
         .about("Identity management")
-        .subcommand(App::new("list").about("Lists identities"))
-        .subcommand(App::new("ids").about("Lists identities ids"))
+        .subcommand(Command::new("list").about("Lists identities"))
+        .subcommand(Command::new("ids").about("Lists identities ids"))
         .subcommand(prepare_get_subcommand("Get identity"))
 }
 
-fn prepare_web() -> App<'static> {
-    App::new("web")
+fn prepare_web() -> Command {
+    Command::new("web")
         .arg(prepare_data_dir())
         .arg(
             Arg::new("port")
                 .env("UCELOFKA_PORT")
-                .about("Port which will be used for the web server")
+                .help("Port which will be used for the web server")
                 .long("port")
-                .takes_value(true)
+                .num_args(1)
+                .value_parser(value_parser!(u16))
                 .required(false)
                 .default_value("8080"),
         )
         .about("start webserver frontend for ucelofka")
 }
 
-fn prepare_completions() -> App<'static> {
-    App::new("completions").about("completions generator").arg(
-        Arg::new("shell")
-            .short('s')
-            .long("shell")
-            .about("For which shell the completion is supposed to be generated")
-            .possible_values(&["bash", "fish", "elvish", "powershell", "zsh"])
-            .required(true),
-    )
+fn prepare_completions() -> Command {
+    Command::new("completions")
+        .about("completions generator")
+        .arg(
+            Arg::new("shell")
+                .short('s')
+                .long("shell")
+                .help("For which shell the completion is supposed to be generated")
+                .value_parser(["bash", "fish", "elvish", "powershell", "zsh"])
+                .required(true),
+        )
 }
 
-fn prepare_template_subcommand() -> App<'static> {
-    App::new("template")
+fn prepare_template_subcommand() -> Command {
+    Command::new("template")
         .arg(prepare_data_dir())
         .about("Template management")
-        .subcommand(App::new("list").about("Lists templates"))
+        .subcommand(Command::new("list").about("Lists templates"))
         .subcommand(prepare_get_subcommand("Get template"))
 }
 
-fn prepare_ids_subcommand() -> App<'static> {
-    App::new("ids")
+fn prepare_ids_subcommand() -> Command {
+    Command::new("ids")
         .arg(prepare_data_dir())
         .about("Print ids of all entities")
 }
 
-fn prepare_app() -> App<'static> {
-    App::new(crate_name!())
+fn prepare_cmd() -> Command {
+    Command::new(crate_name!())
         .author(crate_authors!())
         .version(crate_version!())
         .about(crate_description!())
@@ -352,44 +355,49 @@ fn prepare_app() -> App<'static> {
         .subcommand(prepare_ids_subcommand())
 }
 
-fn get_data_dir(matches: &ArgMatches) -> PathBuf {
-    let data_dir = matches.value_of("data_dir").unwrap();
-    Path::new(data_dir).canonicalize().unwrap()
+fn get_data_dir(matches: &ArgMatches) -> Result<PathBuf> {
+    let data_dir = matches.get_one::<PathBuf>("data_dir").unwrap();
+    check_data_dir(data_dir)
 }
 
-fn exit_on_parse_error(mut app: App) {
+fn exit_on_parse_error(mut cmd: Command) {
     println!();
-    app.write_long_help(&mut io::stdout()).unwrap();
+    cmd.write_long_help(&mut io::stdout()).unwrap();
     std::process::exit(1);
 }
 
-fn process_invoice(app: App, matches: &ArgMatches) -> Result<()> {
-    let data_path = get_data_dir(matches);
+fn process_invoice(cmd: Command, matches: &ArgMatches) -> Result<()> {
+    let data_path = get_data_dir(matches)?;
     match matches.subcommand() {
         Some(("create", create_matches)) => {
-            let due: Option<usize> = match create_matches.value_of("due") {
-                Some(due_str) => Some(due_str.parse().unwrap()),
-                None => None,
-            };
+            let due: Option<usize> = create_matches.get_one::<usize>("due").copied();
+            let entries: Vec<String> = create_matches
+                .get_many::<String>("entry")
+                .unwrap()
+                .map(String::from)
+                .collect();
 
             let new_id = invoice::create(
                 &data_path,
-                create_matches.value_of("customer").unwrap(),
-                create_matches.value_of("identity").unwrap(),
-                create_matches.value_of("account").unwrap(),
-                create_matches.values_of("entry").unwrap().collect(),
-                create_matches.is_present("git"),
+                &create_matches.get_one::<String>("customer").unwrap(),
+                &create_matches.get_one::<String>("identity").unwrap(),
+                &create_matches.get_one::<String>("account").unwrap(),
+                entries,
+                create_matches.get_flag("git"),
                 due,
             )?;
             println!("Created invoice {}", new_id);
         }
         Some(("render", render_matches)) => {
-            let invoice_id = render_matches.value_of("invoice").unwrap();
+            let invoice_id = render_matches
+                .get_one::<String>("invoice")
+                .unwrap()
+                .to_string();
             let filename = invoice::render(
                 data_path.as_ref(),
-                invoice_id,
-                render_matches.value_of("template").unwrap(),
-                render_matches.is_present("git"),
+                &invoice_id,
+                render_matches.get_one::<String>("template").unwrap(),
+                render_matches.get_flag("git"),
             )?;
             println!(
                 "{}",
@@ -406,30 +414,30 @@ fn process_invoice(app: App, matches: &ArgMatches) -> Result<()> {
             println!("{}", invoice::ids(&data_path)?);
         }
         Some(("get", get_matches)) => {
-            let invoice_id = get_matches.value_of("id").unwrap();
+            let invoice_id = get_matches.get_one::<String>("id").unwrap();
             let invoice = invoice::get(&data_path, invoice_id)?;
             println!("{}", invoice);
         }
-        _ => exit_on_parse_error(app),
+        _ => exit_on_parse_error(cmd),
     }
     Ok(())
 }
 
-fn process_project(app: App, matches: &ArgMatches) -> Result<()> {
+fn process_project(cmd: Command, matches: &ArgMatches) -> Result<()> {
     match matches.subcommand() {
         Some(("make", make_matches)) => {
             project::make(
-                make_matches.value_of("target").unwrap(),
-                make_matches.is_present("git"),
+                make_matches.get_one::<PathBuf>("target").unwrap().as_path(),
+                make_matches.get_flag("git"),
             )?;
         }
-        _ => exit_on_parse_error(app),
+        _ => exit_on_parse_error(cmd),
     }
     Ok(())
 }
 
-fn process_accounts(app: App, matches: &ArgMatches) -> Result<()> {
-    let data_path = get_data_dir(matches);
+fn process_accounts(cmd: Command, matches: &ArgMatches) -> Result<()> {
+    let data_path = get_data_dir(matches)?;
     match matches.subcommand() {
         Some(("list", _)) => {
             println!("{}", account::list(&data_path)?);
@@ -438,17 +446,17 @@ fn process_accounts(app: App, matches: &ArgMatches) -> Result<()> {
             println!("{}", account::ids(&data_path)?);
         }
         Some(("get", get_matches)) => {
-            let account_id = get_matches.value_of("id").unwrap();
+            let account_id = get_matches.get_one::<String>("id").unwrap();
             let account = account::get(&data_path, account_id)?;
             println!("{}", account);
         }
-        _ => exit_on_parse_error(app),
+        _ => exit_on_parse_error(cmd),
     }
     Ok(())
 }
 
-fn process_customer(app: App, matches: &ArgMatches) -> Result<()> {
-    let data_path = get_data_dir(matches);
+fn process_customer(cmd: Command, matches: &ArgMatches) -> Result<()> {
+    let data_path = get_data_dir(matches)?;
     match matches.subcommand() {
         Some(("list", _)) => {
             println!("{}", customer::list(&data_path)?);
@@ -457,17 +465,17 @@ fn process_customer(app: App, matches: &ArgMatches) -> Result<()> {
             println!("{}", customer::ids(&data_path)?);
         }
         Some(("get", get_matches)) => {
-            let customer_id = get_matches.value_of("id").unwrap();
+            let customer_id = get_matches.get_one::<String>("id").unwrap();
             let customer = customer::get(&data_path, customer_id)?;
             println!("{}", customer);
         }
-        _ => exit_on_parse_error(app),
+        _ => exit_on_parse_error(cmd),
     }
     Ok(())
 }
 
-fn process_entry(app: App, matches: &ArgMatches) -> Result<()> {
-    let data_path = get_data_dir(matches);
+fn process_entry(cmd: Command, matches: &ArgMatches) -> Result<()> {
+    let data_path = get_data_dir(matches)?;
     match matches.subcommand() {
         Some(("list", _)) => {
             println!("{}", entry::list(&data_path)?);
@@ -476,31 +484,40 @@ fn process_entry(app: App, matches: &ArgMatches) -> Result<()> {
             println!("{}", entry::ids(&data_path)?);
         }
         Some(("get", get_matches)) => {
-            let entry_id = get_matches.value_of("id").unwrap();
+            let entry_id = get_matches.get_one::<String>("id").unwrap();
             let entry = entry::get(&data_path, entry_id)?;
             println!("{}", entry);
         }
         Some(("create", create_matches)) => {
-            let id: String = create_matches.value_of("id").unwrap().to_string();
-            let name: String = create_matches.value_of("name").unwrap().to_string();
-            let price: f32 = create_matches.value_of("price").unwrap().parse().unwrap();
-            let currency: String = create_matches.value_of("currency").unwrap().to_string();
-            let git = create_matches.is_present("git");
-            let details: Vec<String> = create_matches
-                .values_of("details")
-                .or_else(|| Some(Values::default()))
+            let id: String = create_matches.get_one::<String>("id").unwrap().to_string();
+            let name: String = create_matches
+                .get_one::<String>("name")
                 .unwrap()
+                .to_string();
+            let price: f32 = create_matches
+                .get_one::<String>("price")
+                .unwrap()
+                .parse()
+                .unwrap();
+            let currency: String = create_matches
+                .get_one::<String>("currency")
+                .unwrap()
+                .to_string();
+            let git = create_matches.get_flag("git");
+            let details: Vec<String> = create_matches
+                .get_many::<String>("details")
+                .unwrap_or_default()
                 .map(String::from)
                 .collect();
             entry::create(&data_path, id, name, price, currency, details, git)?;
         }
-        _ => exit_on_parse_error(app),
+        _ => exit_on_parse_error(cmd),
     }
     Ok(())
 }
 
-fn process_identity(app: App, matches: &ArgMatches) -> Result<()> {
-    let data_path = get_data_dir(matches);
+fn process_identity(cmd: Command, matches: &ArgMatches) -> Result<()> {
+    let data_path = get_data_dir(matches)?;
     match matches.subcommand() {
         Some(("list", _)) => {
             println!("{}", identity::list(&data_path)?);
@@ -509,100 +526,99 @@ fn process_identity(app: App, matches: &ArgMatches) -> Result<()> {
             println!("{}", identity::ids(&data_path)?);
         }
         Some(("get", get_matches)) => {
-            let identity_id = get_matches.value_of("id").unwrap();
+            let identity_id = get_matches.get_one::<String>("id").unwrap();
             let identity = identity::get(&data_path, identity_id)?;
             println!("{}", identity);
         }
-        _ => exit_on_parse_error(app),
+        _ => exit_on_parse_error(cmd),
     }
     Ok(())
 }
 
-fn process_template(app: App, matches: &ArgMatches) -> Result<()> {
-    let data_path = get_data_dir(matches);
+fn process_template(cmd: Command, matches: &ArgMatches) -> Result<()> {
+    let data_path = get_data_dir(matches)?;
     match matches.subcommand() {
         Some(("list", _)) => {
             println!("{}", template::list(&data_path)?);
         }
         Some(("get", get_matches)) => {
-            let template_id = get_matches.value_of("id").unwrap();
+            let template_id = get_matches.get_one::<String>("id").unwrap();
             let template = template::get(&data_path, template_id)?;
             println!("{}", template);
         }
-        _ => exit_on_parse_error(app),
+        _ => exit_on_parse_error(cmd),
     }
     Ok(())
 }
 
-fn process_web(_app: App, matches: &ArgMatches) -> Result<()> {
-    let data_path = get_data_dir(matches);
-    let port_str = matches.value_of("port").unwrap();
-    let port: u16 = port_str.parse::<u16>().map_err(|_| {
-        anyhow!(get_message(
-            "not-a-port-number",
-            Some(fluent_args!["port" => port_str])
-        ))
-    })?;
-    web::run(port, data_path)?;
+fn process_web(_cmd: Command, matches: &ArgMatches) -> Result<()> {
+    let data_path = get_data_dir(matches)?;
+    let port: &u16 = matches.get_one("port").unwrap();
+    web::run(*port, data_path)?;
     Ok(())
 }
 
-fn print_completions<G: Generator>(app: &mut App) {
-    generate::<G, _>(app, app.get_name().to_string(), &mut io::stdout());
+fn print_completions<G: Generator>(generator: G, cmd: &mut Command) {
+    generate(
+        generator,
+        cmd,
+        cmd.get_name().to_string(),
+        &mut io::stdout(),
+    );
 }
 
-fn process_completions(mut app: App, matches: &ArgMatches) -> Result<()> {
-    let shell = matches.value_of("shell").unwrap();
-    match shell {
+fn process_completions(mut cmd: Command, matches: &ArgMatches) -> Result<()> {
+    let shell = matches.get_one::<String>("shell").unwrap();
+    match shell.as_str() {
         "bash" => {
-            print_completions::<Bash>(&mut app);
+            print_completions(Bash, &mut cmd);
             Ok(())
         }
         "elvish" => {
-            print_completions::<Elvish>(&mut app);
+            print_completions(Elvish, &mut cmd);
             Ok(())
         }
         "fish" => {
-            print_completions::<Fish>(&mut app);
+            print_completions(Fish, &mut cmd);
             Ok(())
         }
         "powershell" => {
-            print_completions::<PowerShell>(&mut app);
+            print_completions(PowerShell, &mut cmd);
             Ok(())
         }
         "zsh" => {
-            print_completions::<Zsh>(&mut app);
+            print_completions(Zsh, &mut cmd);
             Ok(())
         }
         _ => unreachable!(),
     }
 }
 
-fn process_ids(_app: App, matches: &ArgMatches) -> Result<()> {
-    let data_path = get_data_dir(matches);
+fn process_ids(_cmd: Command, matches: &ArgMatches) -> Result<()> {
+    let data_path = get_data_dir(matches)?;
     println!("{}", ids::ids(&data_path)?);
     Ok(())
 }
 
 fn main() -> Result<()> {
-    let app = prepare_app();
+    let cmd = prepare_cmd();
 
-    let matches = app.clone().get_matches();
+    let matches = cmd.clone().get_matches();
 
     match matches.subcommand() {
-        Some(("invoice", invoice_matches)) => process_invoice(app.clone(), invoice_matches)?,
-        Some(("project", project_matches)) => process_project(app.clone(), project_matches)?,
-        Some(("account", account_matches)) => process_accounts(app.clone(), account_matches)?,
-        Some(("customer", customer_matches)) => process_customer(app.clone(), customer_matches)?,
-        Some(("entry", entry_matches)) => process_entry(app.clone(), entry_matches)?,
-        Some(("identity", identity_matches)) => process_identity(app.clone(), identity_matches)?,
-        Some(("template", identity_matches)) => process_template(app.clone(), identity_matches)?,
-        Some(("web", web_matches)) => process_web(app.clone(), web_matches)?,
+        Some(("invoice", invoice_matches)) => process_invoice(cmd.clone(), invoice_matches)?,
+        Some(("project", project_matches)) => process_project(cmd.clone(), project_matches)?,
+        Some(("account", account_matches)) => process_accounts(cmd.clone(), account_matches)?,
+        Some(("customer", customer_matches)) => process_customer(cmd.clone(), customer_matches)?,
+        Some(("entry", entry_matches)) => process_entry(cmd.clone(), entry_matches)?,
+        Some(("identity", identity_matches)) => process_identity(cmd.clone(), identity_matches)?,
+        Some(("template", identity_matches)) => process_template(cmd.clone(), identity_matches)?,
+        Some(("web", web_matches)) => process_web(cmd.clone(), web_matches)?,
         Some(("completions", completions_matches)) => {
-            process_completions(app.clone(), completions_matches)?
+            process_completions(cmd.clone(), completions_matches)?
         }
-        Some(("ids", ids_matches)) => process_ids(app.clone(), ids_matches)?,
-        _ => exit_on_parse_error(app),
+        Some(("ids", ids_matches)) => process_ids(cmd.clone(), ids_matches)?,
+        _ => exit_on_parse_error(cmd),
     }
     Ok(())
 }

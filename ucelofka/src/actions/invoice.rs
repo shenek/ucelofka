@@ -34,7 +34,7 @@ pub fn create(
     customer: &str,
     identity: &str,
     account: &str,
-    entries: Vec<&str>,
+    entries: Vec<String>,
     git: bool,
     due: Option<usize>,
 ) -> Result<String> {
@@ -43,7 +43,7 @@ pub fn create(
     let identity = actions::identity::get(data_path, identity)?;
     let mut entries_vec = Vec::new();
     for entry in entries {
-        let entry_item = actions::entry::get(data_path, entry)?;
+        let entry_item = actions::entry::get(data_path, &entry)?;
         entries_vec.push(entry_item);
     }
     // Test same currencies among entries
