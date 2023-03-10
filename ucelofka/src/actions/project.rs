@@ -13,15 +13,18 @@ pub fn make(data_path: &Path, git: bool) -> Result<()> {
     create_dir_all(data_path).map_err(|err| anyhow!("failed to create project root {}", err))?;
 
     // initialize git repository
-    let mut repo =
-        if git {
-            // initialize a repo
-            Some(Repository::init(data_path).map_err(|err| {
-                anyhow!("failed to create git repository in {} ({})", data_path.to_string_lossy(), err)
-            })?)
-        } else {
-            None
-        };
+    let mut repo = if git {
+        // initialize a repo
+        Some(Repository::init(data_path).map_err(|err| {
+            anyhow!(
+                "failed to create git repository in {} ({})",
+                data_path.to_string_lossy(),
+                err
+            )
+        })?)
+    } else {
+        None
+    };
 
     let inner_paths = DEFAULTS.find("**").map_err(|err| anyhow!("{}", err))?;
 
@@ -42,9 +45,13 @@ pub fn make(data_path: &Path, git: bool) -> Result<()> {
                     let mut index = repo_instance
                         .index()
                         .map_err(|err| anyhow!("Failed to get repo index ({})", err))?;
-                    index
-                        .add_path(relative_path)
-                        .map_err(|err| anyhow!("Failed to add a file {} ({})", data_path.to_string_lossy(), err))?;
+                    index.add_path(relative_path).map_err(|err| {
+                        anyhow!(
+                            "Failed to add a file {} ({})",
+                            data_path.to_string_lossy(),
+                            err
+                        )
+                    })?;
                     index
                         .write()
                         .map_err(|err| anyhow!("Failed to write to index ({})", err))?;
