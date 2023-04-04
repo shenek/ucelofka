@@ -13,11 +13,12 @@ categories = ["web-programming"]
 
 [dependencies]
 anyhow = "1"
-console_error_panic_hook = "~0.1.6"
+console_error_panic_hook = "0.1"
+gloo-net = "0.2"
 ucelofka-data = { path="../ucelofka-data/" }
-yew = "0.17"
-ybc = "0.1"
-wee_alloc = "~0.4.5"
+yew = "0.20"
+ybc = "0.4.0-beta"
+wee_alloc = "0.4"
 
 [profile.release]
 # less code to include into binary

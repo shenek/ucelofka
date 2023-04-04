@@ -54,16 +54,16 @@ impl Component for Accounts {
     fn view(&self) -> Html {
         html! {
             <ybc::Container>
-                <ybc::Panel heading=html!{{"Accounts"}}>
+                <ybc::Panel heading={html!{"Accounts"}}>
                 {
                     for self.props.accounts.iter().enumerate().map(|(idx, account)| {
                         html! {
                             <ybc::PanelBlock
-                                tag="a"
-                                onclick=self.link.callback(move |_| Messages::SelectAccount(idx))
-                                active=Some(idx) == self.props.selected_idx
+                                tag={"a"}
+                                onclick={self.link.callback(move |_| Messages::SelectAccount(idx))}
+                                active={Some(idx) == self.props.selected_idx}
                             >
-                                <span class="panel-icon"><i class="bi bi-caret-down-fill" aria-hidden="true"></i></span>
+                                <span class={"panel-icon"}><i class="bi bi-caret-down-fill" aria-hidden="true"></i></span>
                                 {&account.id}
                             </ybc::PanelBlock>
                         }
@@ -75,18 +75,18 @@ impl Component for Accounts {
                         html!{
                             <ybc::Card>
                                 <ybc::CardHeader>
-                                    <p class="card-header-title">{&self.props.accounts[idx].id}</p>
+                                    <p class={"card-header-title"}>{&self.props.accounts[idx].id}</p>
                                 </ybc::CardHeader>
                                 <ybc::CardContent>
                                     <ybc::Content>
                                     <dl>
-                                        <dt><span class="has-text-weight-bold">{"Name:"}</span></dt><dd>{&self.props.accounts[idx].name}</dd>
-                                        <dt><span class="has-text-weight-bold">{"Bank name:"}</span></dt><dd>{&self.props.accounts[idx].bank_name}</dd>
-                                        <dt><span class="has-text-weight-bold">{"Account name:"}</span></dt><dd>{&self.props.accounts[idx].account_name}</dd>
-                                        <dt><span class="has-text-weight-bold">{"Account number:"}</span></dt><dd>{&self.props.accounts[idx].account_number}</dd>
-                                        <dt><span class="has-text-weight-bold">{"IBAN:"}</span></dt><dd>{&self.props.accounts[idx].IBAN}</dd>
-                                        <dt><span class="has-text-weight-bold">{"BIC:"}</span></dt><dd>{&self.props.accounts[idx].BIC}</dd>
-                                        <dt><span class="has-text-weight-bold">{"Currency:"}</span></dt><dd>{&self.props.accounts[idx].currency}</dd>
+                                        <dt><span class={"has-text-weight-bold"}>{"Name:"}</span></dt><dd>{&self.props.accounts[idx].name}</dd>
+                                        <dt><span class={"has-text-weight-bold"}>{"Bank name:"}</span></dt><dd>{&self.props.accounts[idx].bank_name}</dd>
+                                        <dt><span class={"has-text-weight-bold"}>{"Account name:"}</span></dt><dd>{&self.props.accounts[idx].account_name}</dd>
+                                        <dt><span class={"has-text-weight-bold"}>{"Account number:"}</span></dt><dd>{&self.props.accounts[idx].account_number}</dd>
+                                        <dt><span class={"has-text-weight-bold"}>{"IBAN:"}</span></dt><dd>{&self.props.accounts[idx].IBAN}</dd>
+                                        <dt><span class={"has-text-weight-bold"}>{"BIC:"}</span></dt><dd>{&self.props.accounts[idx].BIC}</dd>
+                                        <dt><span class={"has-text-weight-bold"}>{"Currency:"}</span></dt><dd>{&self.props.accounts[idx].currency}</dd>
                                     </dl>
                                     </ybc::Content>
                                 </ybc::CardContent>

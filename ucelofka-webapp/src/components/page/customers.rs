@@ -42,26 +42,17 @@ impl Component for Customers {
         true
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        if props != self.props {
-            self.props = props;
-            true
-        } else {
-            false
-        }
-    }
-
-    fn view(&self) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <ybc::Container>
-                <ybc::Panel heading=html!{{"Customers"}}>
+                <ybc::Panel heading={html!{"Customers"}}>
                 {
                     for self.props.customers.iter().enumerate().map(|(idx, customer)| {
                         html! {
                             <ybc::PanelBlock
-                                tag="a"
-                                onclick=self.link.callback(move |_| Messages::SelectCustomer(idx))
-                                active=Some(idx) == self.props.selected_idx
+                                tag={"a"}
+                                onclick={self.link.callback(move |_| Messages::SelectCustomer(idx))}
+                                active={Some(idx) == self.props.selected_idx}
                             >
                                 <span class="panel-icon"><i class="bi bi-caret-down-fill" aria-hidden="true"></i></span>
                                 {&customer.id}
@@ -80,8 +71,8 @@ impl Component for Customers {
                                 <ybc::CardContent>
                                     <ybc::Content>
                                     <dl>
-                                        <dt><span class="has-text-weight-bold">{"Name:"}</span></dt><dd>{&self.props.customers[idx].name}</dd>
-                                        <dt><span class="has-text-weight-bold">{"Address:"}</span></dt>
+                                        <dt><span class={"has-text-weight-bold"}>{"Name:"}</span></dt><dd>{&self.props.customers[idx].name}</dd>
+                                        <dt><span class={"has-text-weight-bold"}>{"Address:"}</span></dt>
                                         {
                                             for self.props.customers[idx].address.iter().map(|address_part| html!{
                                                 <dd>{address_part}</dd>
@@ -101,7 +92,7 @@ impl Component for Customers {
                                             {
                                                 for self.props.customers[idx].identifications.iter().map(|identification| html!{
                                                     <>
-                                                        <dt><span class="has-text-weight-bold">{format!("{}:", &identification.name)}</span></dt>
+                                                        <dt><span class={"has-text-weight-bold"}>{format!("{}:", &identification.name)}</span></dt>
                                                         <dd>{&identification.value}</dd>
                                                     </>
                                                 })

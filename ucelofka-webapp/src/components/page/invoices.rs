@@ -28,11 +28,11 @@ impl Component for Invoices {
     type Message = Messages;
     type Properties = InvoicesProps;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
         Self { props, link }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> ShouldRender {
         match msg {
             Messages::SelectInvoice(idx) => {
                 if let Some(selected_idx) = self.props.selected_idx {
@@ -57,17 +57,17 @@ impl Component for Invoices {
         }
     }
 
-    fn view(&self) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <ybc::Container>
-                <ybc::Panel heading=html!{{"Invoices"}}>
+                <ybc::Panel heading={html!{"Invoices"}}>
                 {
                     for self.props.invoices.iter().enumerate().map(|(idx, invoice)| {
                         html! {
                             <ybc::PanelBlock
-                                tag="a"
-                                onclick=self.link.callback(move |_| Messages::SelectInvoice(idx))
-                                active=Some(idx) == self.props.selected_idx
+                                tag={"a"}
+                                onclick={self.link.callback(move |_| Messages::SelectInvoice(idx))}
+                                active={Some(idx) == self.props.selected_idx}
                             >
                                 <span class="panel-icon"><i class="bi bi-caret-down-fill" aria-hidden="true"></i></span>
                                 {&invoice.id}

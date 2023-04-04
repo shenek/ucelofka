@@ -8,8 +8,8 @@ use ucelofka_data::{
 use yew::{
     format::{Json, Nothing},
     prelude::*,
-    services::fetch::{FetchService, FetchTask, Request, Response},
 };
+use gloo_net::{FetchService, FetchTask, Request, Response};
 
 use crate::components::page;
 
@@ -82,35 +82,35 @@ impl App {
             MenuItem::Identities => {
                 html! {
                     <>
-                        <page::Identities identities=self.props.identities.clone()></page::Identities>
+                        <page::Identities identities={self.props.identities.clone()}></page::Identities>
                     </>
                 }
             }
             MenuItem::Accounts => {
                 html! {
                     <>
-                        <page::Accounts accounts=self.props.accounts.clone()></page::Accounts>
+                        <page::Accounts accounts={self.props.accounts.clone()}></page::Accounts>
                     </>
                 }
             }
             MenuItem::Customers => {
                 html! {
                     <>
-                        <page::Customers customers=self.props.customers.clone()></page::Customers>
+                        <page::Customers customers={self.props.customers.clone()}></page::Customers>
                     </>
                 }
             }
             MenuItem::Entries => {
                 html! {
                     <>
-                        <page::Entries entries=self.props.entries.clone()></page::Entries>
+                        <page::Entries entries={self.props.entries.clone()}></page::Entries>
                     </>
                 }
             }
             MenuItem::Invoices => {
                 html! {
                     <>
-                        <page::Invoices invoices=self.props.invoices.clone()></page::Invoices>
+                        <page::Invoices invoices={self.props.invoices.clone()}></page::Invoices>
                     </>
                 }
             }
@@ -293,58 +293,58 @@ impl Component for App {
             <>
                 <li>
                     <a
-                        class=if self.props.selected_menu_item == MenuItem::Identities {"is-active"} else {""}
-                        onclick=self.link.callback(|_| Messages::SelectMenuItem(MenuItem::Identities))
+                        class={if self.props.selected_menu_item == MenuItem::Identities {"is-active"} else {""}}
+                        onclick={self.link.callback(|_| Messages::SelectMenuItem(MenuItem::Identities))}
                     >
-                        <ybc::Icon><i class="bi bi-person"></i></ybc::Icon>
+                        <ybc::Icon><i class={"bi bi-person"}></i></ybc::Icon>
                         {"Identities"}
-                        <ybc::Tag classes="is-pulled-right">{self.props.identities.len()}</ybc::Tag>
+                        <ybc::Tag classes={"is-pulled-right"}>{self.props.identities.len()}</ybc::Tag>
                     </a>
                 </li>
                 <li>
                     <a
-                        class=if self.props.selected_menu_item == MenuItem::Accounts {"is-active"} else {""}
-                        onclick=self.link.callback(|_| Messages::SelectMenuItem(MenuItem::Accounts))
+                        class={if self.props.selected_menu_item == MenuItem::Accounts {"is-active"} else {""}}
+                        onclick={self.link.callback(|_| Messages::SelectMenuItem(MenuItem::Accounts))}
                     >
-                        <ybc::Icon><i class="bi bi-credit-card-2-front"></i></ybc::Icon>
+                        <ybc::Icon><i class={"bi bi-credit-card-2-front"}></i></ybc::Icon>
                         {"Accounts"}
-                        <ybc::Tag classes="is-pulled-right">{self.props.accounts.len()}</ybc::Tag>
+                        <ybc::Tag classes={"is-pulled-right"}>{self.props.accounts.len()}</ybc::Tag>
                     </a>
                 </li>
                 <li><a
-                        class=if self.props.selected_menu_item == MenuItem::Customers {"is-active"} else {""}
-                        onclick=self.link.callback(|_| Messages::SelectMenuItem(MenuItem::Customers))
+                        class={if self.props.selected_menu_item == MenuItem::Customers {"is-active"} else {""}}
+                        onclick={self.link.callback(|_| Messages::SelectMenuItem(MenuItem::Customers))}
                     >
-                        <ybc::Icon><i class="bi bi-people"></i></ybc::Icon>
+                        <ybc::Icon><i class={"bi bi-people"}></i></ybc::Icon>
                         {"Customers"}
-                        <ybc::Tag classes="is-pulled-right">{self.props.customers.len()}</ybc::Tag>
+                        <ybc::Tag classes={"is-pulled-right"}>{self.props.customers.len()}</ybc::Tag>
                     </a>
                 </li>
                 <li>
                     <a
-                        class=if self.props.selected_menu_item == MenuItem::Entries {"is-active"} else {""}
-                        onclick=self.link.callback(|_| Messages::SelectMenuItem(MenuItem::Entries))
+                        class={if self.props.selected_menu_item == MenuItem::Entries {"is-active"} else {""}}
+                        onclick={self.link.callback(|_| Messages::SelectMenuItem(MenuItem::Entries))}
                     >
-                        <ybc::Icon><i class="bi bi-card-list"></i></ybc::Icon>
+                        <ybc::Icon><i class={"bi bi-card-list"}></i></ybc::Icon>
                         {"Entries"}
-                        <ybc::Tag classes="is-pulled-right">{self.props.entries.len()}</ybc::Tag>
+                        <ybc::Tag classes={"is-pulled-right"}>{self.props.entries.len()}</ybc::Tag>
                     </a>
                 </li>
                 <li>
                     <a
-                        class=if self.props.selected_menu_item == MenuItem::Invoices {"is-active"} else {""}
-                        onclick=self.link.callback(|_| Messages::SelectMenuItem(MenuItem::Invoices))
+                        class={if self.props.selected_menu_item == MenuItem::Invoices {"is-active"} else {""}}
+                        onclick={self.link.callback(|_| Messages::SelectMenuItem(MenuItem::Invoices))}
                     >
-                        <ybc::Icon><i class="bi bi-files"></i></ybc::Icon>
+                        <ybc::Icon><i class={"bi bi-files"}></i></ybc::Icon>
                         {"Invoices"}
-                        <ybc::Tag classes="is-pulled-right">{self.props.invoices.len()}</ybc::Tag>
+                        <ybc::Tag classes={"is-pulled-right"}>{self.props.invoices.len()}</ybc::Tag>
                     </a>
                 </li>
             </>
         };
         let hero_body = html! {
             <>
-                <ybc::Container classes="has-text-centered">
+                <ybc::Container classes={"has-text-centered"}>
                     <ybc::Title>{"Ucelofka"}</ybc::Title>
                     <ybc::Subtitle>{"Manage your invoices in GIT"}</ybc::Subtitle>
                 </ybc::Container>
@@ -352,27 +352,27 @@ impl Component for App {
         };
         html! {
             <>
-                <ybc::Hero body={hero_body} classes="is-light"></ybc::Hero>
+                <ybc::Hero body={hero_body} classes={"is-light"}></ybc::Hero>
                 <ybc::Section>
                     <ybc::Container>
                         <ybc::Columns>
-                            <ybc::Column classes="is-3">
+                            <ybc::Column classes={"is-3"}>
                                 <ybc::Menu>
-                                    <ybc::MenuLabel text="Entities">
+                                    <ybc::MenuLabel text={"Entities"}>
                                     </ybc::MenuLabel>
                                     <ybc::MenuList>
                                         { menu_items }
                                     </ybc::MenuList>
                                 </ybc::Menu>
                             </ybc::Column>
-                            <ybc::Column classes="is-9">
+                            <ybc::Column classes={"is-9"}>
                                 { self.page() }
                             </ybc::Column>
                         </ybc::Columns>
                     </ybc::Container>
                 </ybc::Section>
                 <ybc::Footer>
-                    <ybc::Content classes="has-text-centered">
+                    <ybc::Content classes={"has-text-centered"}>
                         <p>
                             <strong>{"Ucelofka"}</strong>
                         </p>
