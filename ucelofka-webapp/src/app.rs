@@ -6,6 +6,11 @@ use yew::prelude::*;
 use yew_router::history::{AnyHistory, History, MemoryHistory};
 use yew_router::prelude::*;
 
+use crate::{
+    pages::NotFound,
+    components::Nav,
+};
+
 #[derive(Routable, PartialEq, Eq, Clone, Debug)]
 pub enum Route {
     #[at("/")]
@@ -21,7 +26,14 @@ pub fn app() -> Html {
         <>
         <BrowserRouter>
             <main>
-                <Switch<Route> render={switch} />
+                <ybc::Columns>
+                    <ybc::Column classes="is-3">
+                        <Nav />
+                    </ybc::Column>
+                    <ybc::Column>
+                        <Switch<Route> render={switch} />
+                    </ybc::Column>
+                </ybc::Columns>
             </main>
         </BrowserRouter>
         </>
@@ -34,7 +46,7 @@ fn switch(routes: Route) -> Html {
             html! { <div /> }
         }
         Route::NotFound => {
-            html! { <div /> }
+            html! { <NotFound/> }
         }
     }
 }

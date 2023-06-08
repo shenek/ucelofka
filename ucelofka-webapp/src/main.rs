@@ -1,5 +1,6 @@
 #![recursion_limit = "4096"]
 mod components;
+mod pages;
 mod app;
 
 use yew::prelude::*;
