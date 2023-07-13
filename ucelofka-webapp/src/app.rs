@@ -8,6 +8,7 @@ use yew_router::prelude::*;
 
 use crate::{
     pages::NotFound,
+    pages::Identities,
     components::Nav,
 };
 
@@ -15,6 +16,8 @@ use crate::{
 pub enum Route {
     #[at("/")]
     Home,
+    #[at("/identities")]
+    Identities,
     #[not_found]
     #[at("/404")]
     NotFound,
@@ -31,7 +34,9 @@ pub fn app() -> Html {
                         <Nav />
                     </ybc::Column>
                     <ybc::Column>
-                        <Switch<Route> render={switch} />
+                        <ybc::Container>
+                            <Switch<Route> render={switch} />
+                        </ybc::Container>
                     </ybc::Column>
                 </ybc::Columns>
             </main>
@@ -47,6 +52,9 @@ fn switch(routes: Route) -> Html {
         }
         Route::NotFound => {
             html! { <NotFound/> }
+        }
+        Route::Identities => {
+            html! { <Identities/> }
         }
     }
 }
