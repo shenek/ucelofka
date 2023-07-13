@@ -37,9 +37,6 @@ assert_cmd = "~1.0.1"
 tempfile = "~3.2.0"
 test-case = "~1.1.0"
 
-[build-dependencies]
-trunk = "0.8"
-
 [[bin]]
 name = "ucelofka"
 path = "src/main.rs"

@@ -1,6 +1,0 @@
-[submodule "ucelofka-webapp/bulma"]
-	path = ucelofka-webapp/bulma
-	url = https://github.com/jgthms/bulma.git
-[submodule "ucelofka-webapp/twbs-icons"]
-	path = ucelofka-webapp/twbs-icons
-	url = https://github.com/twbs/icons.git

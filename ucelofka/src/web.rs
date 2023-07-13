@@ -3,7 +3,6 @@ mod customer;
 mod entry;
 mod identity;
 mod invoice;
-mod root;
 mod template;
 
 use std::{fmt, path::PathBuf, sync::Mutex};
@@ -54,7 +53,6 @@ async fn actix_main(port: u16, data_dir: PathBuf) -> std::io::Result<()> {
                     .service(invoice::invoice_endpoint())
                     .service(template::template_endpoint()),
             )
-            .service(root::root_endpoint())
     })
     .bind(("localhost", port))?
     .workers(1)
