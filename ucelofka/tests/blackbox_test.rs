@@ -1,5 +1,4 @@
 use assert_cmd::Command;
-use std::fs::remove_file;
 use tempfile::TempDir;
 
 fn prepare_project(git: bool) -> TempDir {
@@ -13,7 +12,6 @@ fn prepare_project(git: bool) -> TempDir {
     let cmd = if git { cmd.arg("--git") } else { cmd };
     cmd.assert().success();
 
-    remove_file(temp_dir.path().join("invoices").join(".gitkeep")).unwrap();
     temp_dir
 }
 

@@ -1,0 +1,52 @@
+---
+_version: 2
+id: 202400001
+issue_date: 2024-01-19
+due_date: 2024-02-03
+issuer:
+  name: Your Name
+  address:
+    - YouStreet 123/4
+    - 56789 YouCity
+    - YouCountry
+  phone:
+    - +420 111 222 333
+  email:
+    - your@email.com
+  www:
+    - www.your-site.com
+  identifications:
+    - name: tax
+      value: CZ1234567890
+    - name: registration
+      value: "987654321"
+customer:
+  name: First Customer
+  address:
+    - CoStreet 1234/5
+    - 12345 CoCity
+    - CoCountry
+  identifications:
+    - name: registration
+      value: "123456"
+    - name: tax
+      value: CZ123456
+  email:
+    - me@customer.com
+entries:
+  - name: IT system management
+    price: 999.989990234375
+    currency: USD
+    details:
+      - System maintenance
+      - DB Optimizations
+      - Performing security updates
+billing:
+  account_name: Your Name
+  account_number: 12-1234632/2700
+  BIC: AABBCCDDEE
+  IBAN: MY11 2222 3333 4444 5555 6666
+  total: 999.989990234375
+  currency: USD
+  variable_symbol: "202400001"
+

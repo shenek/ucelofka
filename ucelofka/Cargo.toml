@@ -14,7 +14,6 @@ include = ["default", "resources", "src"]
 
 [dependencies]
 actix-web = "3.3"
-actix-files = "0.5"
 anyhow = "~1.0.26"
 clap = { version = "4.1.8", features = ["cargo", "env"] }
 clap_complete = "4.1.4"
@@ -31,6 +30,8 @@ tera = "~1.6.1"
 tokio = { version = "1", features = ["rt", "rt-multi-thread"]}
 unic-langid = { version = "~0.9.0", features = ["macros"]}
 ucelofka-data = { path="../ucelofka-data/" }
+dioxus = "0.4"
+dioxus-tui = "0.4"
 
 [dev-dependencies]
 assert_cmd = "~1.0.1"

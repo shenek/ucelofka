@@ -1,6 +1,7 @@
 pub mod actions;
 pub mod storage;
 pub mod translations;
+pub mod tui;
 pub mod web;
 
 use anyhow::{anyhow, Result};
@@ -338,6 +339,12 @@ fn prepare_ids_subcommand() -> Command {
         .about("Print ids of all entities")
 }
 
+fn prepare_tui_subcommand() -> Command {
+    Command::new("tui")
+        .arg(prepare_data_dir())
+        .about("Start ucelofka's tui")
+}
+
 fn prepare_cmd() -> Command {
     Command::new(crate_name!())
         .author(crate_authors!())
@@ -353,6 +360,7 @@ fn prepare_cmd() -> Command {
         .subcommand(prepare_web())
         .subcommand(prepare_completions())
         .subcommand(prepare_ids_subcommand())
+        .subcommand(prepare_tui_subcommand())
 }
 
 fn get_data_dir(matches: &ArgMatches) -> Result<PathBuf> {
@@ -600,6 +608,12 @@ fn process_ids(_cmd: Command, matches: &ArgMatches) -> Result<()> {
     Ok(())
 }
 
+fn process_tui(_cmd: Command, matches: &ArgMatches) -> Result<()> {
+    let path = get_data_dir(matches)?;
+    dioxus_tui::launch_cfg_with_props(tui::App, tui::AppProps { path }, dioxus_tui::Config::new());
+    Ok(())
+}
+
 fn main() -> Result<()> {
     let cmd = prepare_cmd();
 
@@ -618,6 +632,7 @@ fn main() -> Result<()> {
             process_completions(cmd.clone(), completions_matches)?
         }
         Some(("ids", ids_matches)) => process_ids(cmd.clone(), ids_matches)?,
+        Some(("tui", tui_matches)) => process_tui(cmd.clone(), tui_matches)?,
         _ => exit_on_parse_error(cmd),
     }
     Ok(())
