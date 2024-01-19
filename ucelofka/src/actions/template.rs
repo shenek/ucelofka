@@ -5,7 +5,7 @@ use crate::data::template::{Template, Templates};
 
 pub fn list(data_path: &Path) -> Result<Templates> {
     let templates_path = data_path.join(Path::new("templates"));
-    Ok(Templates::load(templates_path.as_path())?)
+    Templates::load(templates_path.as_path())
 }
 
 pub fn get(data_path: &Path, id: &str) -> Result<Template> {

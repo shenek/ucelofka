@@ -24,9 +24,8 @@ use crate::{
     translations::{get_message, texts},
 };
 
-pub fn check_data_dir(path: &PathBuf) -> Result<PathBuf> {
-    let root_dir: &Path = path.as_path();
-    let path_str = path.to_string_lossy().to_string();
+pub fn check_data_dir(root_dir: &Path) -> Result<PathBuf> {
+    let path_str = root_dir.to_string_lossy().to_string();
     if let Ok(path) = root_dir.canonicalize() {
         if !path.is_dir() {
             return Err(anyhow!(get_message(
@@ -71,7 +70,7 @@ fn prepare_data_dir() -> Arg {
         .num_args(1)
         .required(false)
         .value_parser(value_parser!(PathBuf))
-        .help(&texts::DATA_DIRECTORY_PATH.to_string())
+        .help(texts::DATA_DIRECTORY_PATH.to_string())
         .default_value(".")
 }
 
@@ -387,9 +386,9 @@ fn process_invoice(cmd: Command, matches: &ArgMatches) -> Result<()> {
 
             let new_id = invoice::create(
                 &data_path,
-                &create_matches.get_one::<String>("customer").unwrap(),
-                &create_matches.get_one::<String>("identity").unwrap(),
-                &create_matches.get_one::<String>("account").unwrap(),
+                create_matches.get_one::<String>("customer").unwrap(),
+                create_matches.get_one::<String>("identity").unwrap(),
+                create_matches.get_one::<String>("account").unwrap(),
                 entries,
                 create_matches.get_flag("git"),
                 due,

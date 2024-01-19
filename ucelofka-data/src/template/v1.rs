@@ -17,7 +17,7 @@ pub struct Template {
     pub text: Option<String>,
 }
 
-impl<'a> fmt::Display for Template {
+impl fmt::Display for Template {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} ({})", self.name, self.path.to_str().unwrap())?;
         if let Some(text) = &self.text {

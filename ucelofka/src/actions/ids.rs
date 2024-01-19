@@ -25,7 +25,7 @@ pub fn ids(data_path: &Path) -> Result<String> {
     result += &template::list(data_path)?
         .templates
         .iter()
-        .map(|template| format!("{}\n", template.name))
+        .map(|template| template.name.clone() + "\n")
         .collect::<String>();
 
     Ok(result)

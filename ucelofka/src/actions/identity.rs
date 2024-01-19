@@ -13,11 +13,11 @@ pub fn ids(data_path: &Path) -> Result<String> {
 
 pub fn list(data_path: &Path) -> Result<Identities> {
     let identity_path = data_path.join(Path::new("identities"));
-    Ok(Identities::load(identity_path.as_path())?)
+    Identities::load(identity_path.as_path())
 }
 
 pub fn get(data_path: &Path, id: &str) -> Result<Identity> {
-    Ok(list(data_path)?
+    list(data_path)?
         .get(id)
-        .ok_or_else(|| anyhow!("Identity {} not found.", id))?)
+        .ok_or_else(|| anyhow!("Identity {} not found.", id))
 }

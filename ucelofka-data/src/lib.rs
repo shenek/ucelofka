@@ -28,9 +28,9 @@ struct Ver {
     pub _version: u32,
 }
 
-impl Into<u32> for Ver {
-    fn into(self) -> u32 {
-        self._version
+impl From<Ver> for u32 {
+    fn from(value: Ver) -> Self {
+        value._version
     }
 }
 
@@ -38,7 +38,7 @@ impl TryFrom<&str> for Ver {
     type Error = serde_yaml::Error;
 
     fn try_from(input: &str) -> Result<Self, Self::Error> {
-        Ok(serde_yaml::from_str(input)?)
+        serde_yaml::from_str(input)
     }
 }
 
@@ -69,7 +69,7 @@ macro_rules! data_try_from {
             type Error = serde_yaml::Error;
 
             fn try_from(input: String) -> Result<Self, Self::Error> {
-                Ok(serde_yaml::from_str(&input)?)
+                serde_yaml::from_str(&input)
             }
         }
     };

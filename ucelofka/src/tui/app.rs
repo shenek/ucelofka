@@ -51,14 +51,14 @@ impl From<usize> for Page {
     }
 }
 
-impl Into<usize> for Page {
-    fn into(self) -> usize {
-        match self {
-            Self::Accounts => 0,
-            Self::Customers => 1,
-            Self::Entries => 2,
-            Self::Identities => 3,
-            Self::Invoices => 4,
+impl From<Page> for usize {
+    fn from(val: Page) -> Self {
+        match val {
+            Page::Accounts => 0,
+            Page::Customers => 1,
+            Page::Entries => 2,
+            Page::Identities => 3,
+            Page::Invoices => 4,
         }
     }
 }

@@ -69,9 +69,9 @@ pub fn Entries(cx: Scope) -> Element {
             width: "20%",
             items: Rc::new(items_str),
             dot: "❱",
-            idx: entry_page.read().0.into(),
+            idx: entry_page.read().0,
             onindexupdate: move |i: usize| {
-                entry_page.write().0 = i.into();
+                entry_page.write().0 = i;
             }
         }
         div { width: "60%", border_width: "1px", height: "100%", justify_content: "center",

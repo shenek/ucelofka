@@ -1,4 +1,4 @@
-#![allow(non_snake_case, deprecated)]
+#![allow(non_snake_case, deprecated, clippy::large_enum_variant)]
 
 use dioxus::prelude::*;
 use std::rc::Rc;
@@ -60,9 +60,9 @@ pub fn Invoices(cx: Scope) -> Element {
             width: "20%",
             items: Rc::new(items_str),
             dot: "❱",
-            idx: invoice_page.read().0.into(),
+            idx: invoice_page.read().0,
             onindexupdate: move |i: usize| {
-                invoice_page.write().0 = i.into();
+                invoice_page.write().0 = i;
             }
         }
         div { width: "60%", border_width: "1px", height: "100%", justify_content: "center",

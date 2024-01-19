@@ -13,11 +13,11 @@ pub fn ids(data_path: &Path) -> Result<String> {
 
 pub fn list(data_path: &Path) -> Result<Customers> {
     let customer_path = data_path.join(Path::new("customers"));
-    Ok(Customers::load(customer_path.as_path())?)
+    Customers::load(customer_path.as_path())
 }
 
 pub fn get(data_path: &Path, id: &str) -> Result<Customer> {
-    Ok(list(data_path)?
+    list(data_path)?
         .get(id)
-        .ok_or_else(|| anyhow!("Customer {} not found.", id))?)
+        .ok_or_else(|| anyhow!("Customer {} not found.", id))
 }

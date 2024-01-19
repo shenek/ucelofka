@@ -19,13 +19,13 @@ struct WrappedInvoice(Invoice);
 impl TryFrom<WrappedInvoice> for Context {
     type Error = anyhow::Error;
     fn try_from(wrapped_invoice: WrappedInvoice) -> Result<Self> {
-        Ok(Self::from_serialize(wrapped_invoice.0).map_err(anyhow::Error::from)?)
+        Self::from_serialize(wrapped_invoice.0).map_err(anyhow::Error::from)
     }
 }
 
-impl Into<WrappedInvoice> for Invoice {
-    fn into(self) -> WrappedInvoice {
-        WrappedInvoice(self)
+impl From<Invoice> for WrappedInvoice {
+    fn from(val: Invoice) -> Self {
+        WrappedInvoice(val)
     }
 }
 
@@ -75,8 +75,7 @@ pub fn create(
         .map_err(|err| anyhow!("{}", err))?;
 
     if git {
-        let git_path =
-            Path::new("invoices").join(Path::new(&format!("{}.yml", new_invoice.id.to_string())));
+        let git_path = Path::new("invoices").join(Path::new(&format!("{}.yml", new_invoice.id)));
         let repo = Repository::open(data_path)
             .map_err(|err| anyhow!("Faield to open git repository {}", err))?;
 
@@ -106,13 +105,13 @@ pub fn ids(data_path: &Path) -> Result<String> {
 
 pub fn list(data_path: &Path) -> Result<Invoices> {
     let invoice_path = data_path.join(Path::new("invoices"));
-    Ok(Invoices::load(invoice_path.as_path())?)
+    Invoices::load(invoice_path.as_path())
 }
 
 pub fn get(data_path: &Path, id: &str) -> Result<Invoice> {
-    Ok(list(data_path)?
+    list(data_path)?
         .get(id)
-        .ok_or_else(|| anyhow!("Invoice {} not found.", id))?)
+        .ok_or_else(|| anyhow!("Invoice {} not found.", id))
 }
 
 pub fn render(data_path: &Path, invoice: &str, template: &str, git: bool) -> Result<String> {

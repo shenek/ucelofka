@@ -99,9 +99,9 @@ pub fn Identities(cx: Scope) -> Element {
             width: "20%",
             items: Rc::new(items_str),
             dot: "❱",
-            idx: identity_page.read().0.into(),
+            idx: identity_page.read().0,
             onindexupdate: move |i: usize| {
-                identity_page.write().0 = i.into();
+                identity_page.write().0 = i;
             }
         }
         div { width: "60%", border_width: "1px", height: "100%", justify_content: "center",

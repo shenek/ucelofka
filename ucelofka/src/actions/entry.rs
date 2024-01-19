@@ -14,13 +14,13 @@ pub fn ids(data_path: &Path) -> Result<String> {
 
 pub fn list(data_path: &Path) -> Result<Entries> {
     let entry_path = data_path.join(Path::new("entries"));
-    Ok(Entries::load(entry_path.as_path())?)
+    Entries::load(entry_path.as_path())
 }
 
 pub fn get(data_path: &Path, id: &str) -> Result<Entry> {
-    Ok(list(data_path)?
+    list(data_path)?
         .get(id)
-        .ok_or_else(|| anyhow!("Entry {} not found.", id))?)
+        .ok_or_else(|| anyhow!("Entry {} not found.", id))
 }
 
 pub fn create(

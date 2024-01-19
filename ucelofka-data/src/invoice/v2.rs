@@ -94,7 +94,7 @@ impl Invoice {
             .iter()
             .map(|i| i.id + 1)
             .max()
-            .unwrap_or_else(|| Utc::today().naive_utc().year() as u64 * 100_000 + 1)
+            .unwrap_or_else(|| Utc::now().date_naive().year() as u64 * 100_000 + 1)
     }
 
     pub fn new(
@@ -110,7 +110,7 @@ impl Invoice {
         Self {
             _version: VERSION,
             id: new_id,
-            issue_date: Utc::today().format("%Y-%m-%d").to_string(),
+            issue_date: Utc::now().format("%Y-%m-%d").to_string(),
             due_date: (Utc::now()
                 + Duration::days(
                     due.map(|v| i64::try_from(v).unwrap())
