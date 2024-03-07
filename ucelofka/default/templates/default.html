@@ -212,11 +212,11 @@
                         {% endif %}
                         <tr>
                             <td>ID</td>
-                            <td>{{ issuer.identifications.0.value }}</td>
+                            <td>{{ issuer.identifications[0].value }}</td>
                         </tr>
                         <tr>
                             <td>Vat ID</td>
-                            <td>{{ issuer.identifications.1.value }}</td>
+                            <td>{{ issuer.identifications[1].value }}</td>
                         </tr>
                     </table>
                 </td>
@@ -251,7 +251,7 @@
                         {% endif %}
                         <tr>
                             <td>ID</td>
-                            <td>{{ customer.identifications.0.value }}</td>
+                            <td>{{ customer.identifications[0].value }}</td>
                         </tr>
                     </table>
                 </td>
@@ -274,13 +274,13 @@
                 {% endfor %}
                     <ul>
                 </td>
-                <td>{{ item.price|round(precision=2) }}</td>
+                <td>{{ item.price|round(2)|trim("0")|trim(".") }}</td>
             </tr>
             {% endfor %}
             <tr class="total">
                 <td></td>
                 <td>
-                    Total: {{ billing.total|round(precision=2) }}<br/><br/>
+                    Total: {{ billing.total|round(2)|trim("0")|trim(".") }}<br/><br/>
                 </td>
             </tr>
             <tr class="heading">
@@ -314,7 +314,7 @@
                         </tr>
                         </tr>
                             <td>Amount</td>
-                            <th>{{ billing.total|round(precision=2) }}</th>
+                            <th>{{ billing.total|round(2)|trim("0")|trim(".") }}</th>
                         </tr>
                         </tr>
                             <td>Currency</td>

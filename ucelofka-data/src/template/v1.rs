@@ -3,7 +3,7 @@ use html2text::{from_read_with_decorator, render::text_renderer::RichDecorator};
 use serde::{Deserialize, Serialize};
 use std::{
     fmt,
-    fs::File,
+    fs::{read_to_string, File},
     path::{Path, PathBuf},
 };
 
@@ -15,6 +15,7 @@ pub struct Template {
     pub name: String,
     pub path: PathBuf,
     pub text: Option<String>,
+    pub raw: Option<String>,
 }
 
 impl fmt::Display for Template {
@@ -33,6 +34,7 @@ impl Template {
             name: path.file_name().unwrap().to_str().unwrap().to_string(),
             path,
             text: None,
+            raw: None,
         }
     }
 
@@ -46,6 +48,11 @@ impl Template {
             RichDecorator::new(),
         ));
 
+        Ok(())
+    }
+
+    fn fill_raw(&mut self) -> Result<()> {
+        self.raw = Some(read_to_string(&self.path)?);
         Ok(())
     }
 }
@@ -80,6 +87,7 @@ impl Templates {
             if template.name == name {
                 let mut cloned = template.clone();
                 cloned.fill_text()?;
+                cloned.fill_raw()?;
                 return Ok(Some(cloned));
             }
         }

@@ -1,8 +1,8 @@
 use anyhow::{anyhow, Result};
 use fluent::fluent_args;
 use git2::Repository;
-use std::{collections::HashSet, convert::TryFrom, convert::TryInto, fs, path::Path};
-use tera::{Context, Tera};
+use minijinja::{context, Environment, Value};
+use std::{collections::HashSet, fs, path::Path};
 
 use crate::{
     actions,
@@ -15,13 +15,6 @@ use crate::{
 };
 
 struct WrappedInvoice(Invoice);
-
-impl TryFrom<WrappedInvoice> for Context {
-    type Error = anyhow::Error;
-    fn try_from(wrapped_invoice: WrappedInvoice) -> Result<Self> {
-        Self::from_serialize(wrapped_invoice.0).map_err(anyhow::Error::from)
-    }
-}
 
 impl From<Invoice> for WrappedInvoice {
     fn from(val: Invoice) -> Self {
@@ -131,24 +124,18 @@ pub fn render(data_path: &Path, invoice: &str, template: &str, git: bool) -> Res
         .ok_or_else(|| anyhow!("failed to find template {}", template))?;
 
     // Render
-    let templates_path_str = templates_path
-        .to_str()
-        .ok_or_else(|| anyhow!("Wrong path string"))?;
-    let renderer = Tera::new(&format!("{}/*", templates_path_str)).map_err(|err| {
-        anyhow!(
-            "Failed to parse templates from {}: {}",
-            templates_path_str,
-            err
-        )
-    })?;
+    let mut jinja_env = Environment::new();
+    // Read template file
+    jinja_env.add_template_owned(&template_instance.name, template_instance.raw.unwrap())?;
 
+    let ctx = Value::from_serializable(&data);
     let currency = data.entries[0].currency.clone();
-    let wrapped_invoice: WrappedInvoice = data.into();
-    let mut context: Context = wrapped_invoice.try_into()?;
-    context.insert("currency", &currency);
-    let output = match renderer.render(&template_instance.name[..], &context) {
+    // Inject currency into context
+    let ctx = context!(currency => currency, ..ctx);
+    let tmpl = jinja_env.get_template(&template_instance.name)?;
+    let output = match tmpl.render(ctx) {
         Ok(data) => data,
-        Err(err) => return Err(anyhow!("{}", err)),
+        Err(err) => return Err(err.into()),
     };
 
     // Store output
