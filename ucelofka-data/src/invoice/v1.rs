@@ -87,7 +87,7 @@ impl Invoice {
             _version: VERSION,
             id: new_id,
             issue_day: Utc::now().format("%Y-%m-%d").to_string(),
-            due_day: (Utc::now() + Duration::days(DEFAULT_DUE))
+            due_day: (Utc::now() + Duration::try_days(DEFAULT_DUE).unwrap_or_default())
                 .format("%Y-%m-%d")
                 .to_string(),
             issuer: Issuer {
