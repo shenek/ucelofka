@@ -13,22 +13,22 @@ categories = ["command-line-utilities"]
 include = ["default", "resources", "src"]
 
 [dependencies]
-actix-web = "3.3"
-anyhow = "~1.0.26"
-clap = { version = "4.1.8", features = ["cargo", "env"] }
-clap_complete = "4.1.4"
-fluent = "~0.15.0"
-fluent-bundle = "~0.15.0"
-fluent-langneg = "~0.13.0"
-git2 = "~0.13.6"
-lazy_static = "~1.4.0"
+actix-web = "4.5"
+anyhow = "1"
+clap = { version = "4.5", features = ["cargo", "env"] }
+clap_complete = "4.5"
+fluent = "0.15"
+fluent-bundle = "0.15"
+fluent-langneg = "0.13"
+git2 = "~0.18"
+lazy_static = "1.4"
 include_dir = { version = "~0.6.0" }
-intl-memoizer = "~0.5.1"
+intl-memoizer = "0.5"
 minijinja = { version = "~1.0.12", features = ["loader"] }
-serde = { version = "~1.0.104", features = ["derive"]}
-serde_yaml = "~0.8.11"
+serde = { version = "1", features = ["derive"]}
+serde_yaml = "0.9"
 tokio = { version = "1", features = ["rt", "rt-multi-thread"]}
-unic-langid = { version = "~0.9.0", features = ["macros"]}
+unic-langid = { version = "0.9", features = ["macros"]}
 ucelofka-data = { path="../ucelofka-data/" }
 dioxus = "0.4"
 dioxus-tui = "0.4"

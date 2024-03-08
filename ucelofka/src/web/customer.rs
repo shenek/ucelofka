@@ -21,13 +21,13 @@ async fn get_customers(
 async fn get_customer(
     data: web::Data<Mutex<UcelofkaData>>,
     req: HttpRequest,
-    web::Path((id,)): web::Path<(String,)>,
+    path: web::Path<(String,)>,
 ) -> Result<web::Json<Customer>> {
     println!("{:?}", req);
     let data_guard = data.lock().unwrap();
 
     let customer_object =
-        customer::get(&data_guard.data_dir_path, &id).map_err(error::ErrorNotFound)?;
+        customer::get(&data_guard.data_dir_path, &path.0).map_err(error::ErrorNotFound)?;
 
     Ok(web::Json(customer_object))
 }

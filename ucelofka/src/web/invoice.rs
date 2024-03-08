@@ -21,13 +21,13 @@ async fn get_invoices(
 async fn get_invoice(
     data: web::Data<Mutex<UcelofkaData>>,
     req: HttpRequest,
-    web::Path((id,)): web::Path<(String,)>,
+    path: web::Path<(String,)>,
 ) -> Result<web::Json<Invoice>> {
     println!("{:?}", req);
     let data_guard = data.lock().unwrap();
 
     let invoice_object =
-        invoice::get(&data_guard.data_dir_path, &id).map_err(error::ErrorNotFound)?;
+        invoice::get(&data_guard.data_dir_path, &path.0).map_err(error::ErrorNotFound)?;
 
     Ok(web::Json(invoice_object))
 }

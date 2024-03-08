@@ -21,13 +21,13 @@ async fn get_identities(
 async fn get_identity(
     data: web::Data<Mutex<UcelofkaData>>,
     req: HttpRequest,
-    web::Path((id,)): web::Path<(String,)>,
+    path: web::Path<(String,)>,
 ) -> Result<web::Json<Identity>> {
     println!("{:?}", req);
     let data_guard = data.lock().unwrap();
 
     let identity_object =
-        identity::get(&data_guard.data_dir_path, &id).map_err(error::ErrorNotFound)?;
+        identity::get(&data_guard.data_dir_path, &path.0).map_err(error::ErrorNotFound)?;
 
     Ok(web::Json(identity_object))
 }
