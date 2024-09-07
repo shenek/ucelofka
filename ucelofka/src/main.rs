@@ -53,7 +53,7 @@ pub fn check_data_dir(root_dir: &Path) -> Result<PathBuf> {
                 )));
             }
         }
-        Ok(root_dir.to_owned())
+        Ok(path.to_owned())
     } else {
         Err(anyhow!(get_message(
             "path-not-exits",
